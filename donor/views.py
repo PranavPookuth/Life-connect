@@ -14,17 +14,24 @@ class RegisterView(APIView):
     permission_classes = []
     authentication_classes = []
 
-
     def post(self, request):
         email = request.data.get('email')
         username = request.data.get('username')
+
+        # Check if the email is provided
+        if not email:
+            return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the username is provided
+        if not username:
+            return Response({'error': 'username is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(email=email)
 
             if user.is_verified:
-                return Response({'error': 'User with this email is already verified.'},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'user with this email is already verified.'},
+                                 status=status.HTTP_400_BAD_REQUEST)
 
             # Check if OTP is expired, and regenerate if necessary
             if user.is_otp_expired():
@@ -42,17 +49,17 @@ class RegisterView(APIView):
                 )
 
                 return Response({'message': 'A new OTP has been sent to your email. Please verify your OTP.'},
-                                status=status.HTTP_200_OK)
+                                 status=status.HTTP_200_OK)
 
             return Response({'message': 'OTP already sent. Please verify your OTP.'},
-                            status=status.HTTP_200_OK)
+                             status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             # If the user does not exist, create a new user
             otp = random.randint(100000, 999999)
             user = User.objects.create_user(
-                username=username,
-                email=email,
+                username=username,  # Ensure username is passed here
+                email=email,        # Ensure email is passed here
                 otp=otp,
                 otp_generated_at=timezone.now()
             )
@@ -65,7 +72,6 @@ class RegisterView(APIView):
             )
 
             return Response({"message": "User registered successfully. OTP sent."}, status=status.HTTP_201_CREATED)
-
 
 class VerifyOTPView(APIView):
     permission_classes = []
