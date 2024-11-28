@@ -7,13 +7,10 @@ from rest_framework.views import APIView
 from . models import *
 from rest_framework.response import Response
 
-
-
 # Create your views here.
 class RegisterView(APIView):
     permission_classes = []
     authentication_classes = []
-
     def post(self, request):
         email = request.data.get('email')
         username = request.data.get('username')
@@ -76,8 +73,6 @@ class RegisterView(APIView):
 class VerifyOTPView(APIView):
     permission_classes = []
     authentication_classes = []
-
-
     def post(self, request):
         serializer = OTPVerifySerializer(data=request.data)
         if serializer.is_valid():
@@ -120,3 +115,13 @@ class VerifyOTPView(APIView):
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RequestOTPView(APIView):
+    permission_classes = []
+    authentication_classes = []
+    def post(self, request, *args, **kwargs):
+        serializer = RequestOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"message": "OTP sent successfully!"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

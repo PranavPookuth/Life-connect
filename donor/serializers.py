@@ -76,3 +76,29 @@ class OTPVerifySerializer(serializers.ModelSerializer):
         model = User
         fields = ['email','otp']
 
+class RequestOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            if not user.is_active:
+                raise serializers.ValidationError("This account is not active. Please contact support.")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user is registered with this email.")
+
+        # Generate a new OTP for the user every time they request it
+        otp = random.randint(100000, 999999)  # Generate a new 6-digit OTP
+        user.otp = str(otp)
+        user.otp_generated_at = timezone.now()  # Optionally store the timestamp of the OTP generation
+        user.save()
+
+        # Send OTP via email
+        send_mail(
+            'OTP Verification',
+            f'Your OTP is {otp}',
+            'praveencodeedex@gmail.com',
+            [user.email]
+        )
+
+        return value
