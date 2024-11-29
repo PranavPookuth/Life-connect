@@ -11,5 +11,4 @@ urlpatterns=[
     path('user/<int:pk>/', UserDetailView.as_view(), name='user-details'),
 
 
-
 ]

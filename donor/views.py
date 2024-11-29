@@ -67,10 +67,16 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListCreateView(generics.ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+
+
 

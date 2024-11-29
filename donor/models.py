@@ -63,3 +63,6 @@ class User(AbstractBaseUser):
         self.otp = str(randint(100000, 999999))
         self.otp_generated_at = timezone.now()
         self.save()
+
+
+
