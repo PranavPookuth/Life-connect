@@ -9,72 +9,74 @@ from django.utils import timezone
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']
 
     def validate_email(self, value):
-        """
-        Check if the email is already registered and verified.
-        """
+        if not value:
+            raise serializers.ValidationError("Email is required.")
         try:
             user = User.objects.get(email=value)
             if user.is_verified:
                 raise serializers.ValidationError("User with this email is already verified.")
-            else:
-                # Allow OTP regeneration for unverified users
-                self.context['existing_user'] = user
+            self.context['existing_user'] = user
         except User.DoesNotExist:
             pass
         return value
 
+    def validate_blood_type(self, value):
+        allowed_blood_types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        if not value:
+            raise serializers.ValidationError("Blood type is required.")
+        if value not in allowed_blood_types:
+            raise serializers.ValidationError(f"Invalid blood type. Allowed types are: {', '.join(allowed_blood_types)}")
+        return value
+
     def create(self, validated_data):
         if 'existing_user' in self.context:
-            # User exists but is not verified, regenerate OTP
             user = self.context['existing_user']
-            otp = random.randint(100000, 999999)
-            user.otp = otp
-            user.save()
-
-            # Resend OTP via email
+            user.regenerate_otp()
             send_mail(
                 'OTP Verification',
-                f'Your OTP is {otp}',
-                'praveencodeedex@gmail.com',
+                f'Your OTP is {user.otp}',
+                'noreply@example.com',
                 [user.email]
             )
             return user
         else:
-            # New user, create account and generate OTP
-            username = validated_data['username']
-            email = validated_data['email']
-
             user = User.objects.create_user(
-                username=username,
-                email=email,
-                is_active=False
+                username=validated_data['username'],
+                email=validated_data['email'],
+                is_organ_donor=validated_data['is_organ_donor'],
+                is_blood_donor=validated_data['is_blood_donor'],
+                blood_type=validated_data['blood_type']
             )
-
-            otp = random.randint(100000, 999999)
-            user.otp = otp
-            user.save()
-
-            # Send the new OTP to the user's email
+            user.regenerate_otp()
             send_mail(
                 'OTP Verification',
-                f'Your new OTP is {otp}',
-                'praveencodeedex@gmail.com',
+                f'Your OTP is {user.otp}',
+                'noreply@example.com',
                 [user.email]
             )
-
             return user
 
 
-class OTPVerifySerializer(serializers.ModelSerializer):
+class OTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
 
-    class Meta:
-        model = User
-        fields = ['email','otp']
+    def validate(self, data):
+        try:
+            user = User.objects.get(email=data['email'])
+            if user.is_verified:
+                raise serializers.ValidationError("This account is already verified.")
+            if user.otp != data['otp']:
+                raise serializers.ValidationError("Invalid OTP.")
+            if user.is_otp_expired():
+                raise serializers.ValidationError("OTP has expired.")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No account found with this email.")
+        return data
+
 
 class RequestOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -102,3 +104,34 @@ class RequestOTPSerializer(serializers.Serializer):
         )
 
         return value
+
+
+class VerifyOTPLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        try:
+            user = User.objects.get(email=data['email'])
+            if user.is_otp_expired():
+                user.regenerate_otp()
+                send_mail(
+                    'New OTP Verification',
+                    f'Your new OTP is {user.otp}',
+                    'praveencodeedex@gmail.com',
+                    [user.email]
+                )
+                raise serializers.ValidationError("OTP expired. A new OTP has been sent.")
+            if user.otp != data['otp']:
+                raise serializers.ValidationError("Invalid OTP.")
+            if not user.is_active:
+                raise serializers.ValidationError("Account is inactive.")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User does not exist.")
+        return data
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields ='__all__'
+
