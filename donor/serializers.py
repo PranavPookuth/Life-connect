@@ -5,7 +5,12 @@ from django.core.mail import send_mail
 import random
 import uuid
 from django.utils import timezone
+from django.contrib.auth.models import User
+from .models import User
 
+from django.contrib.auth import get_user_model
+
+#user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -62,8 +67,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
             return user
 
-
-
+#Email verification using Otp
 class OTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
@@ -73,15 +77,24 @@ class OTPVerifySerializer(serializers.Serializer):
             user = User.objects.get(email=data['email'])
             if user.is_verified:
                 raise serializers.ValidationError("This account is already verified.")
+            if user.is_otp_expired():
+                # Regenerate a new OTP
+                user.regenerate_otp()
+                send_mail(
+                    'OTP Expired - New OTP',
+                    f'Your new OTP is {user.otp}',
+                    'praveencodeedex@gmail.com',
+                    [user.email]
+                )
+                raise serializers.ValidationError("OTP has expired. A new OTP has been sent to your email.")
             if user.otp != data['otp']:
                 raise serializers.ValidationError("Invalid OTP.")
-            if user.is_otp_expired():
-                raise serializers.ValidationError("OTP has expired.")
         except User.DoesNotExist:
             raise serializers.ValidationError("No account found with this email.")
         return data
 
 
+#requesting for otp to login
 class RequestOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -110,6 +123,7 @@ class RequestOTPSerializer(serializers.Serializer):
         return value
 
 
+#login using email and otp
 class VerifyOTPLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
@@ -134,15 +148,17 @@ class VerifyOTPLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("User does not exist.")
         return data
 
+#user creation
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields =['id',"last_login","email","username","otp","otp_generated_at","is_verified","is_active","is_staff","is_superuser",'blood_type', 'is_organ_donor', 'is_blood_donor']
 
+#donor profile creation
+User = get_user_model()
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  # Require a valid user ID
-
+    user = serializers.CharField(source='user.username')  # Reference the 'username' field of the user model
     class Meta:
         model = UserProfile
         fields = [
@@ -151,24 +167,97 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'address',
             'id_proof',
             'willing_to_donate_organ',
-            'blood_group'
+            'blood_group',
+            'organs_to_donate',
+            'willing_to_donate_blood',
         ]
 
+
+    def validate_user(self, value):
+        """
+        Validate if the provided username corresponds to an existing User.
+        """
+        try:
+            # Look up the user by the username
+            user = User.objects.get(username=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this username does not exist.")
+        return user
+
+    def create(self, validated_data):
+        """
+        Create a UserProfile using the validated data.
+        Here we look up the user by username before saving.
+        """
+        user = validated_data.pop('user')  # Get the username from the validated data
+        user_instance = User.objects.get(username=user)  # Look up the actual user object
+        profile = UserProfile.objects.create(user=user_instance, **validated_data)
+        return profile
+
+    def to_representation(self, instance):
+        """
+        Modify the representation of the serialized data.
+        Exclude `organs_to_donate` if `willing_to_donate_organ` is False.
+        """
+        representation = super().to_representation(instance)
+        if not instance.willing_to_donate_organ:
+            representation.pop('organs_to_donate', None)
+        return representation
+
     def validate(self, data):
-        # List of required fields
-        required_fields = ['user', 'contact_number', 'address', 'id_proof', 'willing_to_donate_organ', 'blood_group']
+        # Ensure address and id_proof are required
+        if 'address' not in data or data.get('address') in [None, '']:
+            raise serializers.ValidationError({'address': "This field is required."})
+        if 'id_proof' not in data or data.get('id_proof') in [None, '']:
+            raise serializers.ValidationError({'id_proof': "This field is required."})
 
-        # Check if any required field is missing or empty
-        for field in required_fields:
-            if field not in data or not data[field]:
-                raise serializers.ValidationError({field: f"{field} is required."})
-
-        # Optionally, validate specific fields further
-        if data['blood_group'] not in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']:
+        # Validate blood_group
+        if 'blood_group' in data and data['blood_group'] not in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']:
             raise serializers.ValidationError(
-                {'blood_group': "Invalid blood group. Allowed values are A+, A-, B+, B-, AB+, AB-, O+, O-."})
+                {'blood_group': "Invalid blood group. Allowed values are A+, A-, B+, B-, AB+, AB-, O+, O-."}
+            )
 
+        # Validate organs_to_donate
+        if data.get('willing_to_donate_organ') and not data.get('organs_to_donate'):
+            raise serializers.ValidationError(
+                {'organs_to_donate': "This field is required if willing to donate organs."}
+            )
+        if 'organs_to_donate' in data and data['organs_to_donate']:
+            if not isinstance(data['organs_to_donate'], list):
+                raise serializers.ValidationError(
+                    {'organs_to_donate': "This field must be a list of organs (e.g., ['Kidney', 'Heart'])."}
+                )
         return data
+
+class BloodDonationScheduleSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(write_only=True)  # Accepts the username as input, but doesn't display it in the response.
+
+    class Meta:
+        model = BloodDonationSchedule
+        fields = [
+            'user',
+            'date',
+            'time',
+            'location',
+            'is_available'
+        ]
+
+    def validate_user(self, value):
+        try:
+            # Look up the User by username
+            user = User.objects.get(username=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this username does not exist.")
+        return user
+
+    def create(self, validated_data):
+        # Create the BloodDonationSchedule object with the User object
+        user = validated_data.pop('user')
+        schedule = BloodDonationSchedule.objects.create(user=user, **validated_data)
+        return schedule
+
+
+
 
 
 

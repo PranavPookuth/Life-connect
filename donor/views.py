@@ -78,19 +78,25 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+User = get_user_model()
+
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
-    queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+
+    def perform_create(self, serializer):
+        # Look up the user by username (instead of ID)
+        username = self.request.data.get('user')
+        user = User.objects.get(username=username)  # Lookup by username
+        serializer.save(user=user)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -99,8 +105,21 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
+class BloodDonationScheduleCreateView(generics.ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = BloodDonationSchedule.objects.all()
+    serializer_class = BloodDonationScheduleSerializer
+
+class BloodDonationScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = BloodDonationSchedule.objects.all()
+    serializer_class = BloodDonationScheduleSerializer
 
 
 
