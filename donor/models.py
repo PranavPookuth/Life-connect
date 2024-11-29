@@ -54,6 +54,12 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+        # Ensure password is not saved
+        if not self.pk and self.password:
+            self.set_unusable_password()
+        super(User, self).save(*args, **kwargs)
+
     def is_otp_expired(self):
         """ Check if the OTP has expired (5 minutes window). """
         if not self.otp_generated_at:
@@ -65,3 +71,27 @@ class User(AbstractBaseUser):
         self.otp = str(randint(100000, 999999))
         self.otp_generated_at = timezone.now()
         self.save()
+
+class UserProfile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profile")
+    contact_number = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    id_proof = models.FileField(upload_to='id_proofs/', blank=True, null=True)  # File upload for ID proof
+    willing_to_donate_organ = models.BooleanField()
+    blood_group = models.CharField(max_length=3, choices=[
+        ('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'),
+        ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')
+    ])
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            UserProfile.objects.create(user=instance)
+
+
+
+
+
+

@@ -9,7 +9,10 @@ from django.utils import timezone
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']
+        fields = ['username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']  # No password field
+        extra_kwargs = {
+            'password': {'required': False},  # Make sure password is not required
+        }
 
     def validate_email(self, value):
         if not value:
@@ -58,6 +61,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                 [user.email]
             )
             return user
+
 
 
 class OTPVerifySerializer(serializers.Serializer):
@@ -133,7 +137,38 @@ class VerifyOTPLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields ='__all__'
+        fields =['id',"last_login","email","username","otp","otp_generated_at","is_verified","is_active","is_staff","is_superuser",'blood_type', 'is_organ_donor', 'is_blood_donor']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  # Require a valid user ID
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'user',
+            'contact_number',
+            'address',
+            'id_proof',
+            'willing_to_donate_organ',
+            'blood_group'
+        ]
+
+    def validate(self, data):
+        # List of required fields
+        required_fields = ['user', 'contact_number', 'address', 'id_proof', 'willing_to_donate_organ', 'blood_group']
+
+        # Check if any required field is missing or empty
+        for field in required_fields:
+            if field not in data or not data[field]:
+                raise serializers.ValidationError({field: f"{field} is required."})
+
+        # Optionally, validate specific fields further
+        if data['blood_group'] not in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']:
+            raise serializers.ValidationError(
+                {'blood_group': "Invalid blood group. Allowed values are A+, A-, B+, B-, AB+, AB-, O+, O-."})
+
+        return data
 
 
 
