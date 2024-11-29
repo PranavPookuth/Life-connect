@@ -38,7 +38,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             send_mail(
                 'OTP Verification',
                 f'Your OTP is {user.otp}',
-                'noreply@example.com',
+                'praveencodeedex@gmail.com',
                 [user.email]
             )
             return user
@@ -54,7 +54,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             send_mail(
                 'OTP Verification',
                 f'Your OTP is {user.otp}',
-                'noreply@example.com',
+                'praveencodeedex@gmail.com',
                 [user.email]
             )
             return user

@@ -1,8 +1,9 @@
-import uuid
 from random import randint
-from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, otp=None, is_organ_donor=False, is_blood_donor=False, blood_type=None, **extra_fields):
@@ -23,6 +24,7 @@ class UserManager(BaseUserManager):
             blood_type=blood_type,
             **extra_fields
         )
+        user.set_unusable_password()  # Ensures no password is required
         user.save(using=self._db)
         return user
 
@@ -63,6 +65,3 @@ class User(AbstractBaseUser):
         self.otp = str(randint(100000, 999999))
         self.otp_generated_at = timezone.now()
         self.save()
-
-
-
