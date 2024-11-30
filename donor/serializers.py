@@ -230,7 +230,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
 
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(write_only=True)  # Accepts the username as input, but doesn't display it in the response.
+    user = serializers.CharField(source='user.username', read_only=True) # Accepts username but doesn't return it in response
+    is_available = serializers.BooleanField(required=True)  # Make this field required (user must explicitly provide it)
 
     class Meta:
         model = BloodDonationSchedule
@@ -253,12 +254,8 @@ class BloodDonationScheduleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create the BloodDonationSchedule object with the User object
         user = validated_data.pop('user')
-        schedule = BloodDonationSchedule.objects.create(user=user, **validated_data)
+        user_instance = User.objects.get(username=user)  # Retrieve User instance by username
+        schedule = BloodDonationSchedule.objects.create(user=user_instance, **validated_data)
         return schedule
-
-
-
-
-
 
 

@@ -1,4 +1,7 @@
 import random
+
+from django.contrib.gis.geos.prototypes import get_nrings
+
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render
@@ -115,14 +118,21 @@ class BloodDonationScheduleCreateView(generics.ListCreateAPIView):
     queryset = BloodDonationSchedule.objects.all()
     serializer_class = BloodDonationScheduleSerializer
 
+    def perform_create(self, serializer):
+        # Get the username from the request and validate it using the custom validate_user method
+        username = self.request.data.get('user')
+        if username:
+            # Validate the user before saving
+            user = User.objects.get(username=username)
+            serializer.save(user=user)  # Assign the validated user
+        else:
+            raise serializers.ValidationError({'user': 'Username is required.'})
+
 class BloodDonationScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
     queryset = BloodDonationSchedule.objects.all()
     serializer_class = BloodDonationScheduleSerializer
-
-
-
 
 
 

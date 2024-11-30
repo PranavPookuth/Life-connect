@@ -104,11 +104,10 @@ class BloodDonationSchedule(models.Model):
     date = models.DateField(help_text="Date of the scheduled donation")
     time = models.TimeField(help_text="Time of the scheduled donation")
     location = models.CharField(max_length=255, help_text="Location of the blood donation")
-    is_available = models.BooleanField(default=True, help_text="Indicates if the user is available for donation")
+    is_available = models.BooleanField(null=True, help_text="Indicates if the user is available for donation")
 
     def __str__(self):
         return f"Blood Donation for {self.user.username} on {self.date} at {self.time}"
-
 
 
 
