@@ -1,7 +1,4 @@
 import random
-
-from django.contrib.gis.geos.prototypes import get_nrings
-
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render

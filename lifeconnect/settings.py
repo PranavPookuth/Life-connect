@@ -88,6 +88,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -135,5 +136,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default backend
     'donor.backends.CustomBackend',
 )
+import os
 
 AUTH_USER_MODEL = 'donor.User'
