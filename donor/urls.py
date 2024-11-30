@@ -15,9 +15,8 @@ urlpatterns=[
     # URL to retrieve, update, or delete a UserProfile by ID
     path('user-profile/<int:pk>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
 
-    path('donation-schedules/',BloodDonationScheduleCreateView.as_view(),name="bdonation-schedules/"),
-    path('donation-schedules/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='donation-schedule-detail'),
-
+    path('schedule-donation/', BloodDonationScheduleView.as_view(), name='schedule-donation'),
+    path('update-availability/', UpdateAvailabilityView.as_view(), name='update-availability'),
 
 
 

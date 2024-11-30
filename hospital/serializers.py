@@ -62,7 +62,6 @@ class HospitalOTPVerifySerializer(serializers.Serializer):
             raise serializers.ValidationError("No hospital found with this email.")
         return data
 
-
 class HospitalRequestLoginOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -84,8 +83,6 @@ class HospitalRequestLoginOTPSerializer(serializers.Serializer):
             [hospital.email]
         )
         return value
-
-
 
 class HospitalLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()

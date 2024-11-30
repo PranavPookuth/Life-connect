@@ -1,3 +1,4 @@
+from datetime import timedelta
 from random import randint
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -74,7 +75,7 @@ class User(AbstractBaseUser):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profile")
-    contact_number = models.IntegerField(null=False,blank=False)
+    contact_number = models.IntegerField(null=False, blank=False)
     address = models.TextField(blank=False, null=False)
     id_proof = models.FileField(upload_to='id_proofs/', blank=False, null=False)  # File upload for ID proof
     willing_to_donate_organ = models.BooleanField()
@@ -91,23 +92,31 @@ class UserProfile(models.Model):
         default=False,
         help_text="Indicates if the user is willing to donate blood."
     )
+    last_donation_date = models.DateField(null=False, blank=False)
+    next_available_date = models.DateField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.last_donation_date:
+            self.next_available_date = self.last_donation_date + timedelta(days=90)
+        else:
+            self.next_available_date = None  # First time user, no donation yet
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Profile of {self.user.username}"
 
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance)
+
 
 class BloodDonationSchedule(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="donation_schedules")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="donation_schedules", null=True, blank=True)
     date = models.DateField(help_text="Date of the scheduled donation")
     time = models.TimeField(help_text="Time of the scheduled donation")
     location = models.CharField(max_length=255, help_text="Location of the blood donation")
     is_available = models.BooleanField(null=True, help_text="Indicates if the user is available for donation")
 
     def __str__(self):
-        return f"Blood Donation for {self.user.username} on {self.date} at {self.time}"
+        return f"Blood Donation for {self.user.username if self.user else 'Anonymous'} on {self.date} at {self.time}"
+
 
 
 

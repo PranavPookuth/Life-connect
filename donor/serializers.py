@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytz
 from rest_framework import serializers
 from .models import *
@@ -170,6 +172,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'blood_group',
             'organs_to_donate',
             'willing_to_donate_blood',
+            'last_donation_date'
         ]
 
 
@@ -230,32 +233,36 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
 
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source='user.username', read_only=True) # Accepts username but doesn't return it in response
-    is_available = serializers.BooleanField(required=True)  # Make this field required (user must explicitly provide it)
-
     class Meta:
         model = BloodDonationSchedule
-        fields = [
-            'user',
-            'date',
-            'time',
-            'location',
-            'is_available'
-        ]
+        fields = ['date', 'time', 'location', 'is_available']
 
-    def validate_user(self, value):
-        try:
-            # Look up the User by username
-            user = User.objects.get(username=value)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User with this username does not exist.")
-        return user
+    def validate_date(self, value):
+        if value < date.today():
+            raise serializers.ValidationError("You cannot schedule a donation in the past.")
+        return value
 
-    def create(self, validated_data):
-        # Create the BloodDonationSchedule object with the User object
-        user = validated_data.pop('user')
-        user_instance = User.objects.get(username=user)  # Retrieve User instance by username
-        schedule = BloodDonationSchedule.objects.create(user=user_instance, **validated_data)
-        return schedule
+class UpdateAvailabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['willing_to_donate_blood']
+
+    def validate(self, data):
+        profile = self.instance
+
+        # Check if the user has donated blood before
+        if not profile.last_donation_date:
+            # For first-time donors, there's no need to check for next available date
+            return data
+
+        # For users who have donated before, check the next available date
+        if profile.next_available_date <= date.today():
+            return data
+
+        raise serializers.ValidationError(
+            f"You are not eligible to donate blood until {profile.next_available_date}."
+        )
+
+
 
 

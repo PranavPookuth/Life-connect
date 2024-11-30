@@ -109,21 +109,48 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(user=self.request.user)
 
 
-class BloodDonationScheduleCreateView(generics.ListCreateAPIView):
-    permission_classes = []
+class BloodDonationScheduleView(APIView):
+    permission_classes = []  # No authentication required for this view
     authentication_classes = []
-    queryset = BloodDonationSchedule.objects.all()
-    serializer_class = BloodDonationScheduleSerializer
 
-    def perform_create(self, serializer):
-        # Get the username from the request and validate it using the custom validate_user method
-        username = self.request.data.get('user')
-        if username:
-            # Validate the user before saving
-            user = User.objects.get(username=username)
-            serializer.save(user=user)  # Assign the validated user
+    def post(self, request):
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            user = request.user
+            user_profile = UserProfile.objects.get(user=user)
+
+            # Check if this is the first-time donation (no last_donation_date)
+            if not user_profile.last_donation_date:
+                # First-time donation, set last_donation_date
+                user_profile.last_donation_date = date.today()
+                user_profile.save()
+                # After saving the donation, set the next available date
+                user_profile.next_available_date = user_profile.last_donation_date + timedelta(days=90)
+                user_profile.save()
+            elif user_profile.next_available_date > date.today():
+                return Response(
+                    {"error": f"You are not eligible to donate blood until {user_profile.next_available_date}."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            # Save donation schedule and associate with the authenticated user
+            serializer = BloodDonationScheduleSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(user=user)
+                return Response({"message": "Blood donation scheduled successfully!"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         else:
-            raise serializers.ValidationError({'user': 'Username is required.'})
+            # Handle anonymous user
+            # If anonymous, don't associate donation with any user
+            serializer = BloodDonationScheduleSerializer(data=request.data)
+            if serializer.is_valid():
+                # Save donation schedule without user association for anonymous user
+                serializer.save()
+                return Response({"message": "Blood donation scheduled successfully!"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 class BloodDonationScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
@@ -131,5 +158,19 @@ class BloodDonationScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodDonationSchedule.objects.all()
     serializer_class = BloodDonationScheduleSerializer
 
+class UpdateAvailabilityView(APIView):
+    permission_classes = []
+    authentication_classes = []
+
+    def patch(self, request):
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            serializer = UpdateAvailabilitySerializer(instance=profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Availability updated successfully!"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
