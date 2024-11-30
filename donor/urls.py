@@ -18,11 +18,6 @@ urlpatterns=[
     path('donation-schedules/',BloodDonationScheduleCreateView.as_view(),name="bdonation-schedules/"),
     path('donation-schedules/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='donation-schedule-detail'),
 
-    path('hospital-register/', HospitalRegisterView.as_view(), name='hospital-register'),
-    path('hospital-verify-otp/', HospitalVerifyOTPView.as_view(), name='hospital-verify-otp'),
-    path('hospital-request-otp/', HospitalRequestLoginOTPView.as_view(), name='hospital-request-otp'),
-    path('hospital-login/', HospitalLoginView.as_view(), name='hospital-login'),
-    path('hospital-details/<int:pk>/',HospitalDetailView.as_view(),name='hospital-details'),
 
 
 
