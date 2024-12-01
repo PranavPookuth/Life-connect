@@ -16,6 +16,7 @@ urlpatterns=[
     path('user-profile/<int:pk>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
 
     path('schedule-donation/', BloodDonationScheduleView.as_view(), name='schedule-donation'),
+    path('schedule-donation/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='schedule-donation-details'),
     path('update-availability/', UpdateAvailabilityView.as_view(), name='update-availability'),
 
 

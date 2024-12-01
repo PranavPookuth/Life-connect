@@ -238,9 +238,21 @@ class BloodDonationScheduleSerializer(serializers.ModelSerializer):
         fields = ['date', 'time', 'location', 'is_available']
 
     def validate_date(self, value):
+        # Ensure the donation date is not in the past
         if value < date.today():
             raise serializers.ValidationError("You cannot schedule a donation in the past.")
         return value
+
+    def validate(self, data):
+        # Check if the user has donated blood within the last 90 days
+        user_profile = UserProfile.objects.get(user=self.context['request'].user)
+
+        if user_profile.last_donation_date and (date.today() - user_profile.last_donation_date).days < 90:
+            raise serializers.ValidationError(
+                "You cannot schedule a donation within 3 months of your last donation."
+            )
+        return data
+
 
 class UpdateAvailabilitySerializer(serializers.ModelSerializer):
     class Meta:
