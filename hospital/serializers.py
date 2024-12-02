@@ -7,6 +7,9 @@ import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from donor.models import UserProfile, BloodDonationSchedule
+
+
 
 class HospitalRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,3 +119,19 @@ class HospitalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hospital
         fields = '__all__'
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = '__all__'  # You can specify specific fields if needed
+
+class BloodDonationScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodDonationSchedule
+        fields = '__all__'
+
+class DonorSearchSerializer(serializers.Serializer):
+    blood_type = serializers.CharField(max_length=10, required=False, allow_blank=True)
+    willing_to_donate_organs = serializers.BooleanField(required=False)
+    location = serializers.CharField(max_length=100, required=False, allow_blank=True)
+

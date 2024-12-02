@@ -1,6 +1,7 @@
 from datetime import timedelta
 from random import randint
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
@@ -74,7 +75,7 @@ class User(AbstractBaseUser):
         self.save()
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     contact_number = models.IntegerField(null=False, blank=False)
     address = models.TextField(blank=False, null=False)
     id_proof = models.FileField(upload_to='id_proofs/', blank=False, null=False)  # File upload for ID proof
@@ -92,30 +93,25 @@ class UserProfile(models.Model):
         default=False,
         help_text="Indicates if the user is willing to donate blood."
     )
-    last_donation_date = models.DateField(null=False, blank=False)
-    next_available_date = models.DateField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if self.last_donation_date:
-            self.next_available_date = self.last_donation_date + timedelta(days=90)
-        else:
-            self.next_available_date = None  # First time user, no donation yet
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Profile of {self.user.username}"
 
-
+User = get_user_model()
 
 class BloodDonationSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="donation_schedules", null=True, blank=True)
     date = models.DateField(help_text="Date of the scheduled donation")
-    time = models.TimeField(help_text="Time of the scheduled donation")
     location = models.CharField(max_length=255, help_text="Location of the blood donation")
-    is_available = models.BooleanField(null=True, help_text="Indicates if the user is available for donation")
+    is_available = models.BooleanField(default=True, help_text="Indicates if the user is available for donation")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="The time when the donation schedule was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="The time when the donation schedule was last updated")
 
     def __str__(self):
-        return f"Blood Donation for {self.user.username if self.user else 'Anonymous'} on {self.date} at {self.time}"
+        return f"Blood Donation for {self.user.username if self.user else 'Anonymous'} on {self.date}"
+
+    class Meta:
+        ordering = ['date']  # Ensures that schedules are ordered by date
 
 
 

@@ -159,99 +159,43 @@ class UserSerializer(serializers.ModelSerializer):
 #donor profile creation
 User = get_user_model()
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source='user.username')  # Reference the 'username' field of the user model
+    # Update the 'user' field to return the username instead of the full user object
+    user = serializers.StringRelatedField()
+
     class Meta:
         model = UserProfile
-        fields = [
-            'user',
-            'contact_number',
-            'address',
-            'id_proof',
-            'willing_to_donate_organ',
-            'blood_group',
-            'organs_to_donate',
-            'willing_to_donate_blood',
-            'last_donation_date'
-        ]
-
-
-    def validate_user(self, value):
-        """
-        Validate if the provided username corresponds to an existing User.
-        """
-        try:
-            # Look up the user by the username
-            user = User.objects.get(username=value)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User with this username does not exist.")
-        return user
-
-    def create(self, validated_data):
-        """
-        Create a UserProfile using the validated data.
-        Here we look up the user by username before saving.
-        """
-        user = validated_data.pop('user')  # Get the username from the validated data
-        user_instance = User.objects.get(username=user)  # Look up the actual user object
-        profile = UserProfile.objects.create(user=user_instance, **validated_data)
-        return profile
+        fields = ['id', 'user', 'contact_number', 'address', 'id_proof', 'blood_group', 'willing_to_donate_organ',
+                  'organs_to_donate', 'willing_to_donate_blood']
 
     def to_representation(self, instance):
-        """
-        Modify the representation of the serialized data.
-        Exclude `organs_to_donate` if `willing_to_donate_organ` is False.
-        """
         representation = super().to_representation(instance)
+
+        # If the user is not willing to donate organs, remove the organs_to_donate field from the response
         if not instance.willing_to_donate_organ:
-            representation.pop('organs_to_donate', None)
+            representation.pop('organs_to_donate', None)  # Remove organs_to_donate field
+
         return representation
 
-    def validate(self, data):
-        # Ensure address and id_proof are required
-        if 'address' not in data or data.get('address') in [None, '']:
-            raise serializers.ValidationError({'address': "This field is required."})
-        if 'id_proof' not in data or data.get('id_proof') in [None, '']:
-            raise serializers.ValidationError({'id_proof': "This field is required."})
-
-        # Validate blood_group
-        if 'blood_group' in data and data['blood_group'] not in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']:
-            raise serializers.ValidationError(
-                {'blood_group': "Invalid blood group. Allowed values are A+, A-, B+, B-, AB+, AB-, O+, O-."}
-            )
-
-        # Validate organs_to_donate
-        if data.get('willing_to_donate_organ') and not data.get('organs_to_donate'):
-            raise serializers.ValidationError(
-                {'organs_to_donate': "This field is required if willing to donate organs."}
-            )
-        if 'organs_to_donate' in data and data['organs_to_donate']:
-            if not isinstance(data['organs_to_donate'], list):
-                raise serializers.ValidationError(
-                    {'organs_to_donate': "This field must be a list of organs (e.g., ['Kidney', 'Heart'])."}
-                )
-        return data
 
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(write_only=True, required=True)  # Accept username as a string
+
     class Meta:
         model = BloodDonationSchedule
-        fields = ['date', 'time', 'location', 'is_available']
+        fields = ['id', 'user', 'date', 'location', 'is_available', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     def validate_date(self, value):
-        # Ensure the donation date is not in the past
-        if value < date.today():
-            raise serializers.ValidationError("You cannot schedule a donation in the past.")
+        if value < timezone.now().date():
+            raise serializers.ValidationError("Donation date cannot be in the past.")
         return value
 
     def validate(self, data):
-        # Check if the user has donated blood within the last 90 days
-        user_profile = UserProfile.objects.get(user=self.context['request'].user)
-
-        if user_profile.last_donation_date and (date.today() - user_profile.last_donation_date).days < 90:
-            raise serializers.ValidationError(
-                "You cannot schedule a donation within 3 months of your last donation."
-            )
+        # Perform user validation in the view, so here we just return the data
         return data
+
 
 
 class UpdateAvailabilitySerializer(serializers.ModelSerializer):

@@ -1,4 +1,7 @@
 import random
+
+from rest_framework.exceptions import ValidationError, NotFound
+
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render
@@ -105,39 +108,69 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
+    def get_object(self):
+        # Retrieve the user profile using the user ID in the URL
+        try:
+            user_profile = UserProfile.objects.get(pk=self.kwargs['pk'])
+            return user_profile
+        except UserProfile.DoesNotExist:
+            raise NotFound("User profile not found.")
+
+    def perform_update(self, serializer):
+        # Ensure that the profile is updated for the correct user
+        user_profile = self.get_object()
+        serializer.save(user=user_profile.user)  # Save the profile for the associated user
+
+    def patch(self, request, *args, **kwargs):
+        # Override the PATCH method to allow partial updates
+        instance = self.get_object()  # Retrieve the profile instance
+
+        # Update the instance with the partial data provided in the request
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()  # Save the updated data
+            return Response(serializer.data)  # Return the updated data
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BloodDonationScheduleCreateView(generics.CreateAPIView):
+    queryset = BloodDonationSchedule.objects.all()
+    serializer_class = BloodDonationScheduleSerializer
+    permission_classes = []  # No authentication needed
+    authentication_classes = []
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Get the username from the request data
+        username = self.request.data.get('user')
 
-
-class BloodDonationScheduleView(APIView):
-    permission_classes = []  # No permission classes needed
-    authentication_classes = []  # No authentication classes needed
-
-    def post(self, request):
-        # Extract the username from the request data
-        username = request.data.get("user")
         if not username:
-            return Response({"error": "User is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "User information is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Look up the user by username
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            return Response({"error": "User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "User with this username does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the user has donated blood within the last 90 days
-        user_profile = UserProfile.objects.get(user=user)
-        if user_profile.last_donation_date and (date.today() - user_profile.last_donation_date).days < 90:
-            return Response(
-                {"error": "You cannot schedule a donation within 3 months of your last donation."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        donation_date = serializer.validated_data['date']
 
-        # Now we can save the blood donation schedule
-        serializer = BloodDonationScheduleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=user)  # Save the schedule with the user
-            return Response({"message": "Blood donation scheduled successfully!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Check if the user has already donated within the past 3 months
+        three_months_ago = timezone.now().date() - timedelta(days=90)
+        last_donation = BloodDonationSchedule.objects.filter(user=user).order_by('-date').first()
+
+        if last_donation and last_donation.date > three_months_ago:
+            raise serializers.ValidationError("You have already donated blood in the last 3 months.")
+
+        # Save the blood donation schedule if valid
+        serializer.save(user=user)
+
+    def create(self, request, *args, **kwargs):
+        # Override the create method to handle validation errors
+        try:
+            return super().create(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 class BloodDonationScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
