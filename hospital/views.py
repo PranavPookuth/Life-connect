@@ -1,8 +1,7 @@
 from django.shortcuts import render
 import random
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.exceptions import NotFound, ValidationError
+from django_filters.rest_framework import filters
 from rest_framework.filters import SearchFilter
 
 from .serializers import *
@@ -96,51 +95,31 @@ class HospitalBloodDonationScheduleListView(generics.ListAPIView):
     queryset = BloodDonationSchedule.objects.all()  # Fetch all blood donation schedules
     serializer_class = BloodDonationScheduleSerializer
 
+class DonorSearchView(APIView):
+    def get(self, request):
+        # Get query parameters
+        blood_group = request.query_params.get('blood_group', None)
+        willing_to_donate_organ = request.query_params.get('willing_to_donate_organ', None)
 
-class DonorSearchView(generics.ListAPIView):
-    serializer_class = UserProfileSerializer
+        # Start with all donors
+        queryset = UserProfile.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        # Deserialize the search parameters
-        search_serializer = DonorSearchSerializer(data=request.query_params)
+        # Filter by blood_group if provided
+        if blood_group:
+            queryset = queryset.filter(blood_group__iexact=blood_group.strip())
 
-        if search_serializer.is_valid():
-            # Extract validated data
-            blood_group = search_serializer.validated_data.get('blood_group')
-            willing_to_donate_organs = search_serializer.validated_data.get('willing_to_donate_organs')
-            location = search_serializer.validated_data.get('location')
+        # Filter by willing_to_donate_organ if provided
+        if willing_to_donate_organ is not None:
+            queryset = queryset.filter(willing_to_donate_organ=willing_to_donate_organ.lower() == 'true')
 
-            # Start with the base queryset for UserProfile
-            queryset = UserProfile.objects.all()
+        # Check if any donors match the filters
+        if not queryset.exists():
+            return Response({"detail": "No donors found"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Apply filters if parameters are provided
-            if blood_group:
-                # Ensure valid blood group choice before applying the filter
-                valid_blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-                if blood_group not in valid_blood_groups:
-                    raise ValidationError("Invalid blood group provided.")
+        # Serialize the queryset
+        serializer = UserProfileSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-                # Filter by exact blood group match
-                queryset = queryset.filter(blood_group=blood_group)
-
-            if willing_to_donate_organs is not None:
-                # Filter by willing to donate organs
-                queryset = queryset.filter(willing_to_donate_organ=willing_to_donate_organs)
-
-            if location:
-                # Ensure that the UserProfile has a related BloodDonationSchedule with the specified location
-                queryset = queryset.filter(blooddonationschedule__location__icontains=location).distinct()
-
-            # If no results are found, return a 404 response
-            if not queryset.exists():
-                return Response({"message": "No donors found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
-
-            # Serialize the filtered results
-            donor_serializer = UserProfileSerializer(queryset, many=True)
-            return Response(donor_serializer.data, status=status.HTTP_200_OK)
-
-        # If the serializer is not valid, return errors
-        return Response(search_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

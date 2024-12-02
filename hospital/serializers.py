@@ -1,5 +1,6 @@
+import django_filters
 import pytz
-from rest_framework import serializers
+from rest_framework import serializers, generics
 from .models import *
 from django.core.mail import send_mail
 import random
@@ -8,7 +9,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from donor.models import UserProfile, BloodDonationSchedule
-
+from django_filters.rest_framework import DjangoFilterBackend
+import django_filters
 
 
 class HospitalRegisterSerializer(serializers.ModelSerializer):
@@ -131,7 +133,15 @@ class BloodDonationScheduleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DonorSearchSerializer(serializers.Serializer):
-    blood_type = serializers.CharField(max_length=10, required=False, allow_blank=True)
+    blood_group = serializers.CharField(max_length=3, required=False)  # Example: 'A+', 'O-', etc.
     willing_to_donate_organs = serializers.BooleanField(required=False)
-    location = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    location = serializers.CharField(max_length=100, required=False)
+
+
+
+
+
+
+
+
 
