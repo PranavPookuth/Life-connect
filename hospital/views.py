@@ -102,7 +102,7 @@ class DonorSearchView(APIView):
     """
 
     def get(self, request):
-        # Get query parameters
+        # Retrieve query parameters
         blood_group = request.query_params.get('blood_group')
         willing_to_donate_organ = request.query_params.get('willing_to_donate_organ')
 
@@ -112,15 +112,21 @@ class DonorSearchView(APIView):
         # Validate and filter by blood group
         valid_blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
         if blood_group:
+            blood_group = blood_group.strip("'").strip().upper()  # Remove quotes and normalize input
             if blood_group not in valid_blood_groups:
-                raise ValidationError({'blood_group': f"Invalid blood group. Valid options are {', '.join(valid_blood_groups)}"})
-            queryset = queryset.filter(blood_group__iexact=blood_group.strip())
+                raise ValidationError({
+                    'blood_group': f"Invalid blood group. Valid options are {', '.join(valid_blood_groups)}"
+                })
+            queryset = queryset.filter(blood_group__iexact=blood_group)
 
         # Validate and filter by willingness to donate organs
         if willing_to_donate_organ is not None:
-            if willing_to_donate_organ.lower() not in ['true', 'false']:
-                raise ValidationError({'willing_to_donate_organ': "This field must be 'true' or 'false'."})
-            queryset = queryset.filter(willing_to_donate_organ=(willing_to_donate_organ.lower() == 'true'))
+            willing_to_donate_organ = willing_to_donate_organ.strip().lower()
+            if willing_to_donate_organ not in ['true', 'false']:
+                raise ValidationError({
+                    'willing_to_donate_organ': "This field must be 'true' or 'false'."
+                })
+            queryset = queryset.filter(willing_to_donate_organ=(willing_to_donate_organ == 'true'))
 
         # Check if any donors match the filters
         if not queryset.exists():
@@ -129,6 +135,8 @@ class DonorSearchView(APIView):
         # Serialize and return the queryset
         serializer = UserProfileSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=200)
+
+
 
 
 
