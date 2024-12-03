@@ -235,7 +235,6 @@ class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloodDonationRegistration
         fields = ['id', 'user', 'camp', 'registration_date']
-
     def get_user(self, obj):
         return obj.user.user.username  # Retrieve the username from the related User
 
