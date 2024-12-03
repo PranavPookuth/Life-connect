@@ -18,6 +18,7 @@ urlpatterns=[
     path('schedule-donation/', BloodDonationScheduleCreateView.as_view(), name='schedule-donation'),
     path('schedule-donation/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='schedule-donation-details'),
     path('update-availability/', UpdateAvailabilityView.as_view(), name='update-availability'),
-
+    path('upcoming-camps/', UpcomingBloodDonationCampsView.as_view(), name='upcoming-camps'),
+    path('register-camp/', RegisterForCampView.as_view(), name='register-camp'),
 
 ]

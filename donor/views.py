@@ -1,16 +1,16 @@
 import random
-
 from rest_framework.exceptions import ValidationError, NotFound
-
 from .serializers import *
 from django.core.mail import send_mail
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
 from . models import *
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework import generics
+from hospital.models import BloodDonationCampSchedule
+
 
 # Create your views here.
 class RegisterView(APIView):
@@ -193,6 +193,36 @@ class UpdateAvailabilityView(APIView):
         except UserProfile.DoesNotExist:
             return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
+class UpcomingBloodDonationCampsView(generics.ListAPIView):
+    queryset = BloodDonationCampSchedule.objects.filter(date__gte=timezone.now().date())  # Get upcoming camps
+    serializer_class = BloodDonationCampScheduleSerializer
+    permission_classes = []  # You can allow unauthenticated users to see upcoming camps
+    authentication_classes = []
 
 
+class RegisterForCampView(generics.CreateAPIView):
+    queryset = BloodDonationRegistration.objects.all()
+    serializer_class = BloodDonationRegistrationSerializer
+    permission_classes = []
+    authentication_classes = []
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        camp_id = request.data.get('camp')
+
+        # Validate that the camp exists and is still scheduled
+        try:
+            camp = BloodDonationCampSchedule.objects.get(id=camp_id, status='scheduled')
+        except BloodDonationCampSchedule.DoesNotExist:
+            return Response({"error": "Invalid or unavailable camp."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the user is already registered for the camp
+        if BloodDonationRegistration.objects.filter(user_id=user_id, camp=camp).exists():
+            return Response({"error": "User is already registered for this camp."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save the registration
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 

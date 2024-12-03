@@ -12,6 +12,9 @@ from .models import User
 
 from django.contrib.auth import get_user_model
 
+from hospital.models import BloodDonationCampSchedule
+
+
 #user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -218,6 +221,18 @@ class UpdateAvailabilitySerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             f"You are not eligible to donate blood until {profile.next_available_date}."
         )
+class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
+    hospital = serializers.StringRelatedField()  # Uses the __str__ method of the Hospital model
+
+    class Meta:
+        model = BloodDonationCampSchedule
+        fields = ['id', 'hospital', 'date', 'location', 'start_time', 'end_time', 'description', 'status', 'created_at']
+
+
+class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodDonationRegistration
+        fields = ['id', 'user', 'camp', 'registration_date']
 
 
 

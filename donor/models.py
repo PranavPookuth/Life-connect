@@ -6,6 +6,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
 
+from hospital.models import BloodDonationCampSchedule
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, otp=None, is_organ_donor=False, is_blood_donor=False, blood_type=None, **extra_fields):
@@ -95,7 +97,7 @@ class UserProfile(models.Model):
     )
 
     def __str__(self):
-        return f"Profile of {self.user.username}"
+        return f"Profile of {self.user.username},{self.blood_group}"
 
 User = get_user_model()
 
@@ -113,7 +115,10 @@ class BloodDonationSchedule(models.Model):
     class Meta:
         ordering = ['date']  # Ensures that schedules are ordered by date
 
+class BloodDonationRegistration(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    camp = models.ForeignKey(BloodDonationCampSchedule, on_delete=models.CASCADE)
+    registration_date = models.DateTimeField(auto_now_add=True)  # Automatically set the registration date when a record is created
 
-
-
-
+    def __str__(self):
+        return f"{self.user.username} registered for {self.camp.location} on {self.registration_date}"
