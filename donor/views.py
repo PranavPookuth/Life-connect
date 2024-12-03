@@ -209,7 +209,7 @@ class RegisterForCampView(generics.CreateAPIView):
     authentication_classes = []
 
     def create(self, request, *args, **kwargs):
-        username = request.data.get('username')  # Accept username instead of user_id
+        username = request.data.get('user')  # Accept username
         camp_id = request.data.get('camp')
 
         # Validate the camp
@@ -231,7 +231,6 @@ class RegisterForCampView(generics.CreateAPIView):
         # Save the registration
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=user_profile)  # Assign the user
+        serializer.save(user=user_profile)  # Assign the user profile
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 

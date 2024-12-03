@@ -230,13 +230,15 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
 
 
 class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()  # Fetch username instead of user ID
+    user = serializers.CharField(write_only=True)  # Accept username in request
+    user_name = serializers.SerializerMethodField(read_only=True)  # Return username in response
 
     class Meta:
         model = BloodDonationRegistration
-        fields = ['id', 'user', 'camp', 'registration_date']
-    def get_user(self, obj):
-        return obj.user.user.username  # Retrieve the username from the related User
+        fields = ['id', 'user', 'user_name', 'camp', 'registration_date']
+
+    def get_user_name(self, obj):
+        return obj.user.user.username  # Return the username for the user
 
 
 
