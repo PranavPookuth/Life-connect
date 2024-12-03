@@ -200,27 +200,38 @@ class UpcomingBloodDonationCampsView(generics.ListAPIView):
     authentication_classes = []
 
 
+User = get_user_model()
+
 class RegisterForCampView(generics.CreateAPIView):
     queryset = BloodDonationRegistration.objects.all()
     serializer_class = BloodDonationRegistrationSerializer
+    permission_classes = []  # No authentication required
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
-        user_id = request.data.get('user_id')
+        username = request.data.get('username')  # Accept username instead of user_id
         camp_id = request.data.get('camp')
 
-        # Validate that the camp exists and is still scheduled
+        # Validate the camp
         try:
             camp = BloodDonationCampSchedule.objects.get(id=camp_id, status='scheduled')
         except BloodDonationCampSchedule.DoesNotExist:
             return Response({"error": "Invalid or unavailable camp."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Validate the user
+        try:
+            user_profile = UserProfile.objects.get(user__username=username)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "Invalid username."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Check if the user is already registered for the camp
-        if BloodDonationRegistration.objects.filter(user_id=user_id, camp=camp).exists():
+        if BloodDonationRegistration.objects.filter(user=user_profile, camp=camp).exists():
             return Response({"error": "User is already registered for this camp."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save the registration
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        serializer.save(user=user_profile)  # Assign the user
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
