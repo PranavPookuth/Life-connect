@@ -127,15 +127,56 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = '__all__'  # You can specify specific fields if needed
 
-class BloodDonationScheduleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BloodDonationSchedule
-        fields = '__all__'
-
 class DonorSearchSerializer(serializers.Serializer):
     blood_group = serializers.CharField(max_length=3, required=False)  # Example: 'A+', 'O-', etc.
     willing_to_donate_organs = serializers.BooleanField(required=False)
     location = serializers.CharField(max_length=100, required=False)
+
+
+class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
+    hospital = serializers.CharField(max_length=255)  # Accept hospital name as a string
+
+    class Meta:
+        model = BloodDonationCampSchedule
+        fields = ['id', 'hospital', 'date', 'location', 'start_time', 'end_time', 'description', 'status', 'created_at']
+
+    def validate_status(self, value):
+        valid_statuses = ['scheduled', 'completed', 'cancelled']
+        if value not in valid_statuses:
+            raise serializers.ValidationError("Invalid status. Valid options are 'scheduled', 'completed', 'cancelled'.")
+        return value
+
+    def validate_date(self, value):
+        """
+        Ensure that the blood donation camp is not scheduled in the past.
+        """
+        today = timezone.now().date()
+        if value < today:
+            raise serializers.ValidationError("The camp date cannot be in the past.")
+        return value
+
+    def create(self, validated_data):
+        # Look up hospital by name before creating a new BloodDonationCampSchedule instance
+        hospital_name = validated_data['hospital']
+        try:
+            hospital = Hospital.objects.get(name=hospital_name)
+        except Hospital.DoesNotExist:
+            raise serializers.ValidationError(f"Hospital with the name '{hospital_name}' does not exist.")
+
+        validated_data['hospital'] = hospital
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        hospital_name = validated_data.get('hospital', None)
+        if hospital_name:
+            try:
+                hospital = Hospital.objects.get(name=hospital_name)
+            except Hospital.DoesNotExist:
+                raise serializers.ValidationError(f"Hospital with the name '{hospital_name}' does not exist.")
+            validated_data['hospital'] = hospital
+
+        return super().update(instance, validated_data)
+
 
 
 

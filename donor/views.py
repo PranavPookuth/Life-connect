@@ -194,3 +194,5 @@ class UpdateAvailabilityView(APIView):
             return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+

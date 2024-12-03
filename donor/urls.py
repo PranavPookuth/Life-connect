@@ -20,5 +20,4 @@ urlpatterns=[
     path('update-availability/', UpdateAvailabilityView.as_view(), name='update-availability'),
 
 
-
 ]

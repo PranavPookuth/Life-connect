@@ -14,6 +14,9 @@ class Hospital(models.Model):
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
     def regenerate_otp(self):
         """Generate a new OTP and update timestamp."""
         self.otp = str(randint(100000, 999999))  # Generate a 6-digit OTP
@@ -26,4 +29,26 @@ class Hospital(models.Model):
             return True  # OTP not generated yet
         expiration_time = self.otp_generated_at + timezone.timedelta(minutes=5)
         return timezone.now() > expiration_time
+
+
+class BloodDonationCampSchedule(models.Model):
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)  # Hospital hosting the camp
+    date = models.DateField()  # Date of the blood donation camp
+    location = models.CharField(max_length=255)  # Location of the blood donation camp
+    start_time = models.TimeField()  # Start time for the camp
+    end_time = models.TimeField()  # End time for the camp
+    description = models.TextField(blank=True, null=True)  # Description of the camp
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='scheduled')  # Status of the camp
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set when the camp is created
+
+    def __str__(self):
+        return f"Blood Donation Camp at {self.hospital.name} on {self.date} ({self.status})"
+
+
 
