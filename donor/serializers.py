@@ -230,6 +230,7 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
 
 
 class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = BloodDonationRegistration
         fields = ['id', 'user', 'camp', 'registration_date']

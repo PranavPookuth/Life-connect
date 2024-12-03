@@ -203,8 +203,6 @@ class UpcomingBloodDonationCampsView(generics.ListAPIView):
 class RegisterForCampView(generics.CreateAPIView):
     queryset = BloodDonationRegistration.objects.all()
     serializer_class = BloodDonationRegistrationSerializer
-    permission_classes = []
-    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         user_id = request.data.get('user_id')
