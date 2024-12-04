@@ -1,6 +1,7 @@
 from django.db import models
 from random import randint
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Hospital(models.Model):
@@ -49,6 +50,8 @@ class BloodDonationCampSchedule(models.Model):
 
     def __str__(self):
         return f"Blood Donation Camp at {self.hospital.name} on {self.date} ({self.status})"
+
+
 
 
 

@@ -94,11 +94,6 @@ class HospitalDonorListView(generics.ListAPIView):
     queryset = UserProfile.objects.all()  # Fetch all donor profiles
     serializer_class = UserProfileSerializer
 
-class HospitalBloodDonationScheduleListView(generics.ListAPIView):
-    queryset = BloodDonationSchedule.objects.all()  # Fetch all blood donation schedules
-    serializer_class = BloodDonationScheduleSerializer
-
-
 class DonorSearchView(APIView):
     def get(self, request):
         blood_group = request.query_params.get('blood_group')
@@ -143,25 +138,37 @@ class DonorSearchView(APIView):
         return Response(serializer.data, status=200)
 
 
-class BloodDonationCampScheduleListView(generics.ListCreateAPIView):
-    queryset = BloodDonationCampSchedule.objects.all()
-    serializer_class = BloodDonationCampScheduleSerializer
+class BloodDonationCampCreateView(generics.ListCreateAPIView):
     permission_classes = []
-    permission_classes=[]
+    authentication_classes = []
+    serializer_class = BloodDonationCampScheduleSerializer
+
 
     def perform_create(self, serializer):
-        # No changes needed here, since the serializer will handle the lookup
-        serializer.save()
+        # Retrieve hospital name from the request data (this assumes hospital name is provided)
+        hospital_name = self.request.data.get('hospital', None)
 
-    def get_queryset(self):
-        # Optional: Allow filtering by hospital name (query parameter: `hospital_name`)
-        hospital_name = self.request.query_params.get('hospital_name', None)
-        queryset = BloodDonationCampSchedule.objects.all()
+        if not hospital_name:
+            return Response({"detail": "Hospital name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if hospital_name:
-            queryset = queryset.filter(hospital__name__icontains=hospital_name)  # Case-insensitive filter by name
+        # Fetch the hospital instance by name
+        try:
+            hospital = Hospital.objects.get(name=hospital_name)
+        except Hospital.DoesNotExist:
+            return Response({"detail": f"Hospital with the name '{hospital_name}' does not exist."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        return queryset
+        # Check if the hospital is verified and active
+        if not hospital.is_verified or not hospital.is_active:
+            return Response({"detail": "Hospital is not verified or active."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Save the hospital instance to the camp schedule
+        serializer.save(hospital=hospital)
+
+    def create(self, request, *args, **kwargs):
+        # Optionally, perform any pre-processing or additional checks here
+        return super().create(request, *args, **kwargs)
+
 
 class BloodDonationCampScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BloodDonationCampScheduleSerializer

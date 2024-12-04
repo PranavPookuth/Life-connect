@@ -1,11 +1,12 @@
+import uuid
 from datetime import timedelta
 from random import randint
-
+import string
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
-
+import random
 from hospital.models import BloodDonationCampSchedule
 
 
@@ -37,7 +38,17 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(username, email, otp, **extra_fields)
 
+def generate_unique_id():
+    """Generate a 6-character unique alphanumeric ID."""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
 class User(AbstractBaseUser):
+    unique_id = models.CharField(
+        max_length=6,
+        unique=True,
+        editable=False,
+        default=generate_unique_id  # Automatically generate on user creation
+    )    # Automatically generates a unique UUID
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255, blank=False)
     otp = models.CharField(max_length=6, blank=True, null=True)
@@ -56,7 +67,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.unique_id})"
 
     def save(self, *args, **kwargs):
         # Ensure password is not saved
@@ -98,6 +109,10 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.username},{self.blood_group}"
+
+    def get_email(self):
+        """Return the email of the associated user."""
+        return self.user.email
 
 User = get_user_model()
 

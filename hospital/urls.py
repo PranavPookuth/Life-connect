@@ -12,8 +12,7 @@ urlpatterns=[
     path('hospital-login/', HospitalLoginView.as_view(), name='hospital-login'),
     path('hospital-details/<int:pk>/',HospitalDetailView.as_view(),name='hospital-details'),
     path('donors/', HospitalDonorListView.as_view(), name='hospital-donors-list'),
-    path('donation-schedules/', HospitalBloodDonationScheduleListView.as_view(), name='hospital-donation-schedules'),
     path('hospital/donors/search/', DonorSearchView.as_view(), name='donor-search'),
-    path('blood-donation-camps/', BloodDonationCampScheduleListView.as_view(), name='blood-donation-camps-list'),
+    path('hospital/blood-donation-camps/', BloodDonationCampCreateView.as_view(), name='create-camp'),
     path('hospital/blood-donation-camps/<str:hospital_name>/<int:pk>/', BloodDonationCampScheduleDetailView.as_view(), name='blood-donation-camp-detail'),
 ]

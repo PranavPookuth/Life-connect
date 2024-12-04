@@ -17,11 +17,15 @@ from hospital.models import BloodDonationCampSchedule
 
 #user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
 class RegisterSerializer(serializers.ModelSerializer):
+    unique_id = serializers.ReadOnlyField()  # Read-only field for the unique ID
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']  # No password field
+        fields = ['unique_id', 'username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']  # Include unique_id
         extra_kwargs = {
-            'password': {'required': False},  # Make sure password is not required
+            'email': {'required': True},
+            'username': {'required': True},
+            'blood_type': {'required': True},
         }
 
     def validate_email(self, value):
@@ -157,7 +161,7 @@ class VerifyOTPLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields =['id',"last_login","email","username","otp","otp_generated_at","is_verified","is_active","is_staff","is_superuser",'blood_type', 'is_organ_donor', 'is_blood_donor']
+        fields =['unique_id','id',"last_login","email","username","otp","otp_generated_at","is_verified","is_active","is_staff","is_superuser",'blood_type', 'is_organ_donor', 'is_blood_donor']
 
 #donor profile creation
 User = get_user_model()
@@ -166,11 +170,14 @@ User = get_user_model()
 class UserProfileSerializer(serializers.ModelSerializer):
     # Update the 'user' field to return the username instead of the full user object
     user = serializers.StringRelatedField()
+    email = serializers.CharField(source='user.email', read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'contact_number', 'address', 'id_proof', 'blood_group', 'willing_to_donate_organ',
-                  'organs_to_donate', 'willing_to_donate_blood']
+        fields = [
+            'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
+            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood'
+        ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
