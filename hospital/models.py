@@ -51,6 +51,24 @@ class BloodDonationCampSchedule(models.Model):
     def __str__(self):
         return f"Blood Donation Camp at {self.hospital.name} on {self.date} ({self.status})"
 
+class EmergencyDonationAlert(models.Model):
+    BLOOD_GROUP_CHOICES = [
+        ('A+', 'A+'), ('A-', 'A-'),
+        ('B+', 'B+'), ('B-', 'B-'),
+        ('AB+', 'AB+'), ('AB-', 'AB-'),
+        ('O+', 'O+'), ('O-', 'O-'),
+    ]
+
+    hospital = models.ForeignKey('Hospital', on_delete=models.CASCADE)  # Requesting hospital
+    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES)  # Required blood group
+    organ_required = models.CharField(max_length=100, blank=True, null=True)  # E.g., Kidney, Liver
+    location = models.CharField(max_length=255)  # Location of the hospital or emergency site
+    message = models.TextField(blank=True, null=True)  # Additional details about the request
+    created_at = models.DateTimeField(auto_now_add=True)  # Request creation time
+    is_active = models.BooleanField(default=True)  # Whether the alert is still valid
+
+    def __str__(self):
+        return f"Emergency Alert: {self.blood_group} at {self.hospital.name}"
 
 
 

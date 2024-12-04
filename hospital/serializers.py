@@ -177,6 +177,19 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
+class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
+    hospital_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EmergencyDonationAlert
+        fields = [
+            'id', 'hospital','hospital_name', 'blood_group', 'organ_required',
+            'location', 'message', 'created_at', 'is_active'
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def get_hospital_name(self, obj):
+        return obj.hospital.name
 
 
 

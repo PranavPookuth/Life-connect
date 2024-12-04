@@ -185,6 +185,37 @@ class BloodDonationCampScheduleDetailView(generics.RetrieveUpdateDestroyAPIView)
         # You might want to handle any custom updates here
         serializer.save()
 
+# Emergency Donation Alert List and Create
+class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = EmergencyDonationAlert.objects.filter(is_active=True)
+    serializer_class = EmergencyDonationAlertSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Replace hospital name with its primary key in request data
+        hospital_name = request.data.get('hospital')
+        try:
+            hospital = Hospital.objects.get(name=hospital_name)
+            request.data['hospital'] = hospital.id  # Replace with PK
+        except Hospital.DoesNotExist:
+            raise ValidationError({'hospital': 'Hospital with this name does not exist.'})
+
+        # Proceed with the default create logic
+        return super().create(request, *args, **kwargs)
+
+
+# Emergency Donation Alert Retrieve, Update, Delete View
+class EmergencyDonationAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API view to retrieve, update, or delete an EmergencyDonationAlert.
+    """
+    queryset = EmergencyDonationAlert.objects.all()
+    serializer_class = EmergencyDonationAlertSerializer
+    # Ensure these are empty only if no authentication/permissions are required
+    permission_classes = []
+    authentication_classes = []
+
 
 
 
