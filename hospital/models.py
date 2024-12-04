@@ -14,7 +14,7 @@ class Hospital(models.Model):
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.name
 
@@ -50,6 +50,8 @@ class BloodDonationCampSchedule(models.Model):
 
     def __str__(self):
         return f"Blood Donation Camp at {self.hospital.name} on {self.date} ({self.status})"
+
+
 
 
 

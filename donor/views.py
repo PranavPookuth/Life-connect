@@ -239,3 +239,6 @@ class RegisterForCampView(generics.CreateAPIView):
         serializer.save(user=user_profile)  # Assign the user profile
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+class RegisterForCampDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BloodDonationRegistration.objects.all()
+    serializer_class = BloodDonationRegistrationSerializer

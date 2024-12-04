@@ -176,7 +176,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
-            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood'
+            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood','created_at'
         ]
 
     def to_representation(self, instance):
@@ -242,7 +242,7 @@ class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BloodDonationRegistration
-        fields = ['id', 'user', 'user_name', 'camp', 'registration_date']
+        fields = ['id', 'user', 'user_name', 'camp', 'registration_date','created_at']
 
     def get_user_name(self, obj):
         return obj.user.user.username  # Return the username for the user

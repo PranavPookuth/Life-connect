@@ -60,7 +60,7 @@ class User(AbstractBaseUser):
     is_organ_donor = models.BooleanField()
     is_blood_donor = models.BooleanField()
     blood_type = models.CharField(max_length=3)  # E.g., A+, O-
-
+    created_at = models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
@@ -93,6 +93,7 @@ class UserProfile(models.Model):
     address = models.TextField(blank=False, null=False)
     id_proof = models.FileField(upload_to='id_proofs/', blank=False, null=False)  # File upload for ID proof
     willing_to_donate_organ = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
     blood_group = models.CharField(max_length=3, choices=[
         ('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'),
         ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')
@@ -134,6 +135,6 @@ class BloodDonationRegistration(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     camp = models.ForeignKey(BloodDonationCampSchedule, on_delete=models.CASCADE)
     registration_date = models.DateTimeField(auto_now_add=True)  # Automatically set the registration date when a record is created
-
+    created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.user.username} registered for {self.camp.location} on {self.registration_date}"
