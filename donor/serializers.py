@@ -228,6 +228,7 @@ class UpdateAvailabilitySerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             f"You are not eligible to donate blood until {profile.next_available_date}."
         )
+
 class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
     hospital = serializers.StringRelatedField()  # Uses the __str__ method of the Hospital model
 
