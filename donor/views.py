@@ -1,5 +1,7 @@
 import random
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.generics import ListCreateAPIView
+
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
@@ -9,7 +11,7 @@ from . models import *
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework import generics
-from hospital.models import BloodDonationCampSchedule
+from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
 
 # Create your views here.
@@ -242,3 +244,10 @@ class RegisterForCampView(generics.CreateAPIView):
 class RegisterForCampDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodDonationRegistration.objects.all()
     serializer_class = BloodDonationRegistrationSerializer
+
+class EmergencyDonationAlertListCreateView(ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = EmergencyDonationAlert.objects.filter(is_active=True)
+    serializer_class = EmergencyDonationAlertSerializer
+

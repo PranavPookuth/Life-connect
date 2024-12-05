@@ -139,4 +139,3 @@ class BloodDonationRegistration(models.Model):
     def __str__(self):
         return f"{self.user.username} registered for {self.camp.location} on {self.registration_date}"
 
-

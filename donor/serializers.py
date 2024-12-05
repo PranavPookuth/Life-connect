@@ -9,10 +9,10 @@ import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
 from .models import User
-
+from pytz import timezone as pytz_timezone
 from django.contrib.auth import get_user_model
 
-from hospital.models import BloodDonationCampSchedule
+from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
 
 #user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
@@ -247,6 +247,18 @@ class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
     def get_user_name(self, obj):
         return obj.user.user.username  # Return the username for the user
 
+class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
+    hospital_name = serializers.SerializerMethodField()
 
+    class Meta:
+        model = EmergencyDonationAlert
+        fields = [
+            'id', 'hospital','hospital_name', 'blood_group', 'organ_required',
+            'location', 'message', 'created_at', 'is_active'
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def get_hospital_name(self, obj):
+        return obj.hospital.name
 
 
