@@ -261,5 +261,3 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
 
     def get_hospital_name(self, obj):
         return obj.hospital.name
-
-
