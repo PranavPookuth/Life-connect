@@ -260,4 +260,4 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
     def get_hospital_name(self, obj):
-        return obj.hospital.
+        return obj.hospital.name
