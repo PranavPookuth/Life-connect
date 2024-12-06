@@ -246,3 +246,13 @@ class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
     queryset = EmergencyDonationAlert.objects.filter(is_active=True)
     serializer_class = EmergencyDonationAlertSerializer
 
+class DonationResponseCreateView(generics.CreateAPIView):
+    queryset = DonorResponse.objects.all()
+    serializer_class = DonationResponseSerializer
+    permission_classes = []
+    authentication_classes = []
+
+    def perform_create(self, serializer):
+        # Automatically associate the logged-in user with the response
+        serializer.save(user=self.request.user.profile)
+

@@ -3,13 +3,8 @@ from datetime import timedelta
 from random import randint
 import string
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db import models
-from django.utils import timezone
 import random
-from hospital.models import BloodDonationCampSchedule
-
-
+from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 import random
 import string
 from django.db import models
@@ -142,3 +137,15 @@ class BloodDonationRegistration(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.user.username} registered for {self.camp.location} on {self.registration_date}"
+
+class DonorResponse(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)  # The responding user
+    alert = models.ForeignKey(EmergencyDonationAlert, on_delete=models.CASCADE, related_name='responses')
+    response_message = models.TextField(blank=True, null=True)  # Optional message from the user
+    responded_at = models.DateTimeField(auto_now_add=True)  # Timestamp of response
+
+    class Meta:
+        unique_together = ('user', 'alert')  # Prevent duplicate responses from the same user
+
+    def __str__(self):
+        return f"{self.user.user.username} responded to Alert {self.alert.id}"

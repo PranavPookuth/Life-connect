@@ -23,6 +23,8 @@ urlpatterns=[
     path('register-camp/', RegisterForCampView.as_view(), name='register-camp'),
     path('register-camp/<int:pk>/',RegisterForCampDetailView.as_view(),name='register-camp-details'),
     path('alerts/', EmergencyDonationAlertListCreateView.as_view(), name='alert-list-create'),
+    path('alerts/<int:alert_id>/respond/', DonationResponseCreateView.as_view(), name='respond-alert'),
+
 
 
 ]

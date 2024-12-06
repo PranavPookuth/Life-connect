@@ -240,3 +240,19 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
 
     def get_hospital_name(self, obj):
         return obj.hospital.name
+
+class DonationResponseSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DonorResponse
+        fields = ['id', 'user', 'alert', 'response_message', 'responded_at', 'user_name']
+        read_only_fields = ['id', 'responded_at']
+
+    def get_user_name(self, obj):
+        return obj.user.user.username
+
+    def validate_alert(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("You cannot respond to an inactive alert.")
+        return value
