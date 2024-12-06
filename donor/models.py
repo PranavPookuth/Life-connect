@@ -143,6 +143,8 @@ class DonorResponse(models.Model):
     alert = models.ForeignKey(EmergencyDonationAlert, on_delete=models.CASCADE, related_name='responses')
     response_message = models.TextField(blank=True, null=True)  # Optional message from the user
     responded_at = models.DateTimeField(auto_now_add=True)  # Timestamp of response
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.user.user.username} responded to Alert {self.alert.id}"
 

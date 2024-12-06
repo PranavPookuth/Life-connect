@@ -250,18 +250,31 @@ class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
 class DonationResponseCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
-    queryset = DonorResponse.objects.all()
     serializer_class = DonationResponseSerializer
 
     def perform_create(self, serializer):
-        user_profile = UserProfile.objects.get(id=self.request.data['user'])
-        alert = EmergencyDonationAlert.objects.get(id=self.request.data['alert'])
+        user_name = self.request.data.get('user_name')  # Get the username from the request
+        alert_id = self.kwargs['alert_id']  # Get the alert ID from the URL parameter
 
-        # Check if the user has already responded to the same alert
+        try:
+            # Fetch the user profile based on the provided username
+            user_profile = UserProfile.objects.get(user__username=user_name)
+        except UserProfile.DoesNotExist:
+            raise ValidationError({"user_name": "User with this username does not exist."})
+
+        try:
+            # Fetch the alert based on the alert ID
+            alert = EmergencyDonationAlert.objects.get(id=alert_id)
+        except EmergencyDonationAlert.DoesNotExist:
+            raise ValidationError({"alert": "Alert with this ID does not exist."})
+
+        # Ensure that the user has not already responded to this alert
         if DonorResponse.objects.filter(user=user_profile, alert=alert).exists():
-            raise ValidationError("You have already responded to this alert.")
+            raise ValidationError({"non_field_errors": "User has already responded to this alert."})
 
-        # Save the response if the user has not responded yet
-        serializer.save(user=user_profile)
+        # Create the donation response
+        serializer.save(user=user_profile, alert=alert)
+
+        return Response(serializer.data)
 
 

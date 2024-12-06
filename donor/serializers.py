@@ -244,11 +244,12 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
 
 class DonationResponseSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(write_only=True)  # Accept the user_name as input
-    response_message = serializers.CharField(required=True)  # Make the response_message field required
+    response_message = serializers.CharField(required=False)  # The message is optional
+    is_available = serializers.BooleanField(required=True)  # Make 'is_available' required
 
     class Meta:
         model = DonorResponse
-        fields = ['id', 'user_name', 'alert', 'response_message', 'responded_at']
+        fields = ['id', 'user_name', 'alert', 'response_message', 'responded_at', 'is_available']
         read_only_fields = ['id', 'responded_at']
 
     def validate_user_name(self, value):
