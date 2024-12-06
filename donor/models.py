@@ -143,9 +143,6 @@ class DonorResponse(models.Model):
     alert = models.ForeignKey(EmergencyDonationAlert, on_delete=models.CASCADE, related_name='responses')
     response_message = models.TextField(blank=True, null=True)  # Optional message from the user
     responded_at = models.DateTimeField(auto_now_add=True)  # Timestamp of response
-
-    class Meta:
-        unique_together = ('user', 'alert')  # Prevent duplicate responses from the same user
-
     def __str__(self):
         return f"{self.user.user.username} responded to Alert {self.alert.id}"
+

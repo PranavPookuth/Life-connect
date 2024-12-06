@@ -246,13 +246,22 @@ class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
     queryset = EmergencyDonationAlert.objects.filter(is_active=True)
     serializer_class = EmergencyDonationAlertSerializer
 
+
 class DonationResponseCreateView(generics.CreateAPIView):
-    queryset = DonorResponse.objects.all()
-    serializer_class = DonationResponseSerializer
     permission_classes = []
     authentication_classes = []
+    queryset = DonorResponse.objects.all()
+    serializer_class = DonationResponseSerializer
 
     def perform_create(self, serializer):
-        # Automatically associate the logged-in user with the response
-        serializer.save(user=self.request.user.profile)
+        user_profile = UserProfile.objects.get(id=self.request.data['user'])
+        alert = EmergencyDonationAlert.objects.get(id=self.request.data['alert'])
+
+        # Check if the user has already responded to the same alert
+        if DonorResponse.objects.filter(user=user_profile, alert=alert).exists():
+            raise ValidationError("You have already responded to this alert.")
+
+        # Save the response if the user has not responded yet
+        serializer.save(user=user_profile)
+
 

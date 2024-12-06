@@ -241,18 +241,31 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
     def get_hospital_name(self, obj):
         return obj.hospital.name
 
+
 class DonationResponseSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
+    user_name = serializers.CharField(write_only=True)  # Accept the user_name as input
+    response_message = serializers.CharField(required=True)  # Make the response_message field required
 
     class Meta:
         model = DonorResponse
-        fields = ['id', 'user', 'alert', 'response_message', 'responded_at', 'user_name']
+        fields = ['id', 'user_name', 'alert', 'response_message', 'responded_at']
         read_only_fields = ['id', 'responded_at']
 
-    def get_user_name(self, obj):
-        return obj.user.user.username
-
-    def validate_alert(self, value):
-        if not value.is_active:
-            raise serializers.ValidationError("You cannot respond to an inactive alert.")
+    def validate_user_name(self, value):
+        """Validate if the user exists based on the provided user_name."""
+        try:
+            user_profile = UserProfile.objects.get(user__username=value)
+        except UserProfile.DoesNotExist:
+            raise serializers.ValidationError("User with this username does not exist.")
         return value
+
+    def create(self, validated_data):
+        # Retrieve the user profile based on the provided user_name
+        user_name = validated_data.pop('user_name')
+        user_profile = UserProfile.objects.get(user__username=user_name)
+
+        # Create the donation response with the correct user
+        validated_data['user'] = user_profile
+        return super().create(validated_data)
+
+
