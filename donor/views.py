@@ -274,7 +274,6 @@ class DonationResponseCreateView(generics.CreateAPIView):
 
         # Create the donation response
         serializer.save(user=user_profile, alert=alert)
-
         return Response(serializer.data)
 
 
