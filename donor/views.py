@@ -1,7 +1,5 @@
 import random
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.generics import ListCreateAPIView
-
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
@@ -28,9 +26,6 @@ class RegisterView(APIView):
                 "unique_id": user.unique_id
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 class VerifyOTPView(APIView):
     permission_classes = []
@@ -245,7 +240,7 @@ class RegisterForCampDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodDonationRegistration.objects.all()
     serializer_class = BloodDonationRegistrationSerializer
 
-class EmergencyDonationAlertListCreateView(ListCreateAPIView):
+class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
     queryset = EmergencyDonationAlert.objects.filter(is_active=True)

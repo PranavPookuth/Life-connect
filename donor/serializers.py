@@ -12,6 +12,7 @@ from .models import User
 from pytz import timezone as pytz_timezone
 from django.contrib.auth import get_user_model
 
+
 from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
 
@@ -21,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['unique_id', 'username', 'email', 'blood_type', 'is_organ_donor', 'is_blood_donor']  # Include unique_id
+        fields = ['unique_id', 'username', 'email', 'blood_type']
         extra_kwargs = {
             'email': {'required': True},
             'username': {'required': True},
@@ -29,52 +30,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_email(self, value):
-        if not value:
-            raise serializers.ValidationError("Email is required.")
-        try:
-            user = User.objects.get(email=value)
-            if user.is_verified:
-                raise serializers.ValidationError("User with this email is already verified.")
-            self.context['existing_user'] = user
-        except User.DoesNotExist:
-            pass
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
         return value
 
     def validate_blood_type(self, value):
         allowed_blood_types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-        if not value:
-            raise serializers.ValidationError("Blood type is required.")
         if value not in allowed_blood_types:
             raise serializers.ValidationError(f"Invalid blood type. Allowed types are: {', '.join(allowed_blood_types)}")
         return value
 
     def create(self, validated_data):
-        if 'existing_user' in self.context:
-            user = self.context['existing_user']
-            user.regenerate_otp()
-            send_mail(
-                'OTP Verification',
-                f'Your OTP is {user.otp}',
-                'praveencodeedex@gmail.com',
-                [user.email]
-            )
-            return user
-        else:
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                is_organ_donor=validated_data['is_organ_donor'],
-                is_blood_donor=validated_data['is_blood_donor'],
-                blood_type=validated_data['blood_type']
-            )
-            user.regenerate_otp()
-            send_mail(
-                'OTP Verification',
-                f'Your OTP is {user.otp}',
-                'praveencodeedex@gmail.com',
-                [user.email]
-            )
-            return user
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            blood_type=validated_data['blood_type']
+        )
+        user.regenerate_otp()
+        send_mail(
+            'OTP Verification',
+            f'Your OTP is {user.otp}',
+            'praveencodeedex@gmail.com',
+            [user.email]
+        )
+        return user
 
 #Email verification using Otp
 class OTPVerifySerializer(serializers.Serializer):
