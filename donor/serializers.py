@@ -12,7 +12,6 @@ from .models import User
 from pytz import timezone as pytz_timezone
 from django.contrib.auth import get_user_model
 
-
 from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
 

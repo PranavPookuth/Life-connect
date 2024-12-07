@@ -11,7 +11,6 @@ from django.contrib.auth import login
 from rest_framework import generics
 from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
-
 # Create your views here.
 class RegisterView(APIView):
     permission_classes = []
@@ -276,4 +275,8 @@ class DonationResponseCreateView(generics.CreateAPIView):
         serializer.save(user=user_profile, alert=alert)
         return Response(serializer.data)
 
-
+class DonorResponseDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = DonorResponse.objects.all()
+    serializer_class = DonationResponseSerializer
