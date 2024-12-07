@@ -17,15 +17,16 @@ from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
 #user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
 class RegisterSerializer(serializers.ModelSerializer):
-    unique_id = serializers.ReadOnlyField()  # Read-only field for the unique ID
+    unique_id = serializers.ReadOnlyField()
 
     class Meta:
         model = User
-        fields = ['unique_id', 'username', 'email', 'blood_type']
+        fields = ['unique_id', 'username', 'email', 'blood_type', 'is_blood_donor']
         extra_kwargs = {
             'email': {'required': True},
             'username': {'required': True},
             'blood_type': {'required': True},
+            'is_blood_donor': {'required': False},
         }
 
     def validate_email(self, value):
@@ -43,7 +44,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            blood_type=validated_data['blood_type']
+            blood_type=validated_data['blood_type'],
+            is_blood_donor=validated_data.get('is_blood_donor', False)
         )
         user.regenerate_otp()
         send_mail(

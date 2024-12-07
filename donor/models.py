@@ -17,7 +17,7 @@ def generate_unique_id():
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, blood_type, **extra_fields):
+    def create_user(self, username, email, blood_type, is_blood_donor=False, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
         if not username:
@@ -29,6 +29,7 @@ class UserManager(BaseUserManager):
             username=username,
             email=email,
             blood_type=blood_type,
+            is_blood_donor=is_blood_donor,
             **extra_fields
         )
         user.set_unusable_password()  # Ensures no password is required
@@ -39,6 +40,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(username, email, blood_type, **extra_fields)
+
 
 class User(AbstractBaseUser):
     unique_id = models.CharField(
@@ -55,8 +57,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=False)  # Initially set to inactive
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_organ_donor = models.BooleanField()
-    is_blood_donor = models.BooleanField()
+    is_blood_donor = models.BooleanField(default=False)
     blood_type = models.CharField(max_length=3)  # E.g., A+, O-
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -75,16 +76,17 @@ class User(AbstractBaseUser):
         super(User, self).save(*args, **kwargs)
 
     def is_otp_expired(self):
-        """ Check if the OTP has expired (5 minutes window). """
+        """Check if the OTP has expired (5 minutes window)."""
         if not self.otp_generated_at:
             return True  # No OTP generated yet
         return timezone.now() > self.otp_generated_at + timezone.timedelta(minutes=5)
 
     def regenerate_otp(self):
-        """ Regenerate OTP and update timestamp. """
+        """Regenerate OTP and update timestamp."""
         self.otp = str(random.randint(100000, 999999))
         self.otp_generated_at = timezone.now()
         self.save()
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")

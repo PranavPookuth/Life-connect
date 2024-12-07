@@ -26,6 +26,7 @@ class RegisterView(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class VerifyOTPView(APIView):
     permission_classes = []
     authentication_classes = []
