@@ -47,7 +47,6 @@ class RequestOTPView(APIView):
     permission_classes = []
     authentication_classes = []
 
-
     def post(self, request, *args, **kwargs):
         serializer = RequestOTPSerializer(data=request.data)
         if serializer.is_valid():
