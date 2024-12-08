@@ -48,7 +48,7 @@ class RequestOTPView(APIView):
     authentication_classes = []
 
 
-def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = RequestOTPSerializer(data=request.data)
         if serializer.is_valid():
             return Response({"message": "OTP sent successfully!"}, status=status.HTTP_200_OK)
