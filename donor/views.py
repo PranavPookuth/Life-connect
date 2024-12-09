@@ -291,7 +291,6 @@ class ChatMessageListView(generics.ListAPIView):
         hospital_id = self.kwargs.get('hospital_id')
         return ChatMessage.objects.filter(hospital_id=hospital_id)
 
-
 class ChatMessageCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
