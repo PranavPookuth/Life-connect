@@ -1,11 +1,9 @@
 from django.http import Http404
 from django.shortcuts import render
 import random
-
 from django_filters.rest_framework import filters
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
-
 from .serializers import *
 from django.core.mail import send_mail
 from rest_framework import status
@@ -17,6 +15,7 @@ from rest_framework import generics
 from donor.models import  UserProfile, BloodDonationSchedule
 from donor.serializers import UserProfileSerializer, BloodDonationScheduleSerializer
 from urllib.parse import unquote
+from django.db.models import Count
 # Create your views here.
 class HospitalRegisterView(APIView):
     permission_classes = []
@@ -216,6 +215,49 @@ class EmergencyDonationAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
 
+class AnalyticsView(APIView):
+    def get(self, request):
+        total_donors = UserProfile.objects.count()
+        active_alerts = EmergencyDonationAlert.objects.filter(is_active=True).count()
+        total_camps = BloodDonationCampSchedule.objects.count()
+
+        data = {
+            "total_donors": total_donors,
+            "active_alerts": active_alerts,
+            "total_camps": total_camps,
+        }
+        serializer = AnalyticsSerializer(data)
+        return Response(serializer.data)
+
+# Donor Statistics View
+class DonorStatisticsView(APIView):
+    def get(self, request):
+        donors_by_blood_group = UserProfile.objects.values("blood_group").annotate(count=Count("blood_group"))
+        serialized_data = [
+            {"blood_group": entry["blood_group"], "count": entry["count"]}
+            for entry in donors_by_blood_group
+        ]
+        return Response(serialized_data)
+
+# Emergency Alerts Management Views
+class EmergencyAlertsListCreateView(generics.ListCreateAPIView):
+    queryset = EmergencyDonationAlert.objects.all()
+    serializer_class = EmergencyAlertSerializer
+
+class EmergencyAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = EmergencyDonationAlert.objects.all()
+    serializer_class = EmergencyAlertSerializer
+
+# System Management View
+class SystemManagementView(APIView):
+    def get(self, request):
+        users = UserProfile.objects.select_related('user').values(
+            "user__username",
+            "user__email",
+            "user__is_active",  # Accessing the is_active field from the related User model
+            "willing_to_donate_organ",
+        )
+        return Response(users)
 
 
 

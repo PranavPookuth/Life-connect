@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 from donor.models import UserProfile, BloodDonationSchedule
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
+from django.db.models import Count
 
 
 class HospitalRegisterSerializer(serializers.ModelSerializer):
@@ -191,6 +192,24 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
     def get_hospital_name(self, obj):
         return obj.hospital.name
 
+class AnalyticsSerializer(serializers.Serializer):
+    total_donors = serializers.IntegerField()
+    active_alerts = serializers.IntegerField()
+    total_camps = serializers.IntegerField()
+
+class DonorStatisticsSerializer(serializers.Serializer):
+    blood_group = serializers.CharField()
+    count = serializers.IntegerField()
+
+class EmergencyAlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmergencyDonationAlert
+        fields = "__all__"
+
+class SystemManagementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ["user", "is_active", "willing_to_donate_organ"]
 
 
 
