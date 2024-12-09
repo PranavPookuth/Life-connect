@@ -146,7 +146,6 @@ class UserSerializer(serializers.ModelSerializer):
 #donor profile creation
 User = get_user_model()
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     # Update the 'user' field to return the username instead of the full user object
     user = serializers.StringRelatedField()
