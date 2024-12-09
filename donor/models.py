@@ -4,7 +4,7 @@ from random import randint
 import string
 from django.contrib.auth import get_user_model
 import random
-from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
+from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert,Hospital
 import random
 import string
 from django.db import models
@@ -40,7 +40,6 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(username, email, blood_type, **extra_fields)
-
 
 class User(AbstractBaseUser):
     unique_id = models.CharField(
@@ -149,4 +148,37 @@ class DonorResponse(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.user.user.username} responded to Alert {self.alert.id}"
+
+User = get_user_model()
+class ChatMessage(models.Model):
+    SENDER_TYPE_CHOICES = [
+        ('donor', 'Donor'),
+        ('hospital', 'Hospital'),
+    ]
+
+    sender_type = models.CharField(
+        max_length=10,
+        choices=SENDER_TYPE_CHOICES,
+        help_text="Indicates whether the sender is a donor or hospital.",
+    )
+    sender_name = models.CharField(
+        max_length=255,
+        help_text="Name of the sender (donor or hospital).",
+    )
+    hospital = models.ForeignKey(
+        Hospital,
+        on_delete=models.CASCADE,
+        related_name="chat_messages",
+        help_text="The hospital involved in the chat.",
+    )
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.sender_type} ({self.sender_name}): {self.content[:20]}"
+
+    class Meta:
+        ordering = ['-timestamp']
+
 

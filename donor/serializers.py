@@ -270,4 +270,7 @@ class DonationResponseSerializer(serializers.ModelSerializer):
         validated_data['user'] = user_profile
         return super().create(validated_data)
 
-
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'sender_type', 'sender_name', 'hospital', 'content', 'timestamp', 'is_read']

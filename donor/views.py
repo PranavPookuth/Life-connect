@@ -278,3 +278,28 @@ class DonorResponseDetailView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = []
     queryset = DonorResponse.objects.all()
     serializer_class = DonationResponseSerializer
+
+class ChatMessageListView(generics.ListAPIView):
+    permission_classes = []
+    authentication_classes = []
+    """
+    Retrieve chat history between a donor and a hospital.
+    """
+    serializer_class = ChatMessageSerializer
+
+    def get_queryset(self):
+        hospital_id = self.kwargs.get('hospital_id')
+        return ChatMessage.objects.filter(hospital_id=hospital_id)
+
+
+class ChatMessageCreateView(generics.CreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    """
+    Send a message to a hospital or from a hospital to a donor.
+    """
+    serializer_class = ChatMessageSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
+
