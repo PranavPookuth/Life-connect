@@ -166,8 +166,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             representation.pop('organs_to_donate', None)  # Remove organs_to_donate field
 
         return representation
-
-
+#Scheduling Blood Donation camp
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
     user = serializers.CharField(write_only=True, required=True)  # Accept username as a string
 
@@ -185,8 +184,7 @@ class BloodDonationScheduleSerializer(serializers.ModelSerializer):
         # Perform user validation in the view, so here we just return the data
         return data
 
-
-
+#User Updating the Availability for Blood Donation Camp
 class UpdateAvailabilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -207,7 +205,7 @@ class UpdateAvailabilitySerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             f"You are not eligible to donate blood until {profile.next_available_date}."
         )
-
+#User can Accessing Blood Donation Scheduled By hospital
 class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
     hospital = serializers.StringRelatedField()  # Uses the __str__ method of the Hospital model
 
@@ -215,7 +213,7 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
         model = BloodDonationCampSchedule
         fields = ['id', 'hospital', 'date', 'location', 'start_time', 'end_time', 'description', 'status', 'created_at']
 
-
+#User Registering For Blood donation Camp
 class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
     user = serializers.CharField(write_only=True)  # Accept username in request
     user_name = serializers.SerializerMethodField(read_only=True)  # Return username in response
@@ -226,7 +224,7 @@ class BloodDonationRegistrationSerializer(serializers.ModelSerializer):
 
     def get_user_name(self, obj):
         return obj.user.user.username  # Return the username for the user
-
+#User Recieving Emergency Alert from Hospital
 class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
     hospital_name = serializers.SerializerMethodField()
 
@@ -241,7 +239,7 @@ class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
     def get_hospital_name(self, obj):
         return obj.hospital.name
 
-
+#User Responding to Emergency Alert
 class DonationResponseSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(write_only=True)  # Accept the user_name as input
     response_message = serializers.CharField(required=False)  # The message is optional
@@ -269,6 +267,7 @@ class DonationResponseSerializer(serializers.ModelSerializer):
         validated_data['user'] = user_profile
         return super().create(validated_data)
 
+#Chatbox
 class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatMessage

@@ -86,7 +86,7 @@ class User(AbstractBaseUser):
         self.otp_generated_at = timezone.now()
         self.save()
 
-
+#Creating Donor Profile
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     contact_number = models.IntegerField(null=False, blank=False)
