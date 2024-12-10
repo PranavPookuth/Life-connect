@@ -80,19 +80,26 @@ class HospitalLoginView(APIView):
             return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+class HospitalCreateView(generics.ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = Hospital.objects.all()
+    serializer_class = HospitalSerializer
+# Hospital Retrieve, Update, Delete View
 class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
     queryset = Hospital.objects.all()
     serializer_class = HospitalSerializer
 
+#Donor List View
 class HospitalDonorListView(generics.ListAPIView):
     permission_classes = []
     authentication_classes = []
     queryset = UserProfile.objects.all()  # Fetch all donor profiles
     serializer_class = UserProfileSerializer
 
+#Donor Search View
 class DonorSearchView(APIView):
     def get(self, request):
         blood_group = request.query_params.get('blood_group')
@@ -136,7 +143,7 @@ class DonorSearchView(APIView):
         serializer = UserProfileSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=200)
 
-
+# Blood Donation camp Schedule List and create
 class BloodDonationCampCreateView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
@@ -169,6 +176,7 @@ class BloodDonationCampCreateView(generics.ListCreateAPIView):
         return super().create(request, *args, **kwargs)
 
 
+# Blood Donation camp Schedule Retrieve, Update, Delete View
 class BloodDonationCampScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BloodDonationCampScheduleSerializer
     permission_classes = []
@@ -214,7 +222,7 @@ class EmergencyDonationAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
     # Ensure these are empty only if no authentication/permissions are required
     permission_classes = []
     authentication_classes = []
-
+#Analytics view
 class AnalyticsView(APIView):
     def get(self, request):
         total_donors = UserProfile.objects.count()

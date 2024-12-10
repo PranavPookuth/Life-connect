@@ -1,4 +1,3 @@
-
 from django.urls import path
 from .views import *
 
@@ -18,10 +17,13 @@ urlpatterns=[
 
     path('schedule-donation/', BloodDonationScheduleCreateView.as_view(), name='schedule-donation'),
     path('schedule-donation/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='schedule-donation-details'),
+
     path('update-availability/', UpdateAvailabilityView.as_view(), name='update-availability'),
     path('upcoming-camps/', UpcomingBloodDonationCampsView.as_view(), name='upcoming-camps'),
+
     path('register-camp/', RegisterForCampView.as_view(), name='register-camp'),
     path('register-camp/<int:pk>/',RegisterForCampDetailView.as_view(),name='register-camp-details'),
+
     path('alerts/', EmergencyDonationAlertListCreateView.as_view(), name='alert-list-create'),
     path('alerts/<int:alert_id>/respond/', DonationResponseCreateView.as_view(), name='respond-alert'),
     path('alerts/deatils/<int:pk>/',DonorResponseDetailView.as_view(),name='donor-response-details'),

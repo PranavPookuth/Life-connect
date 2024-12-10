@@ -81,7 +81,6 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 User = get_user_model()
-
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
@@ -98,8 +97,6 @@ class UserProfileCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
