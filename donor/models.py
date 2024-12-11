@@ -157,7 +157,6 @@ class ChatMessage(models.Model):
         ('donor', 'Donor'),
         ('hospital', 'Hospital'),
     ]
-
     sender_type = models.CharField(
         max_length=10,
         choices=SENDER_TYPE_CHOICES,
