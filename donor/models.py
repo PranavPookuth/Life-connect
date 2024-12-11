@@ -116,7 +116,7 @@ class UserProfile(models.Model):
         return self.user.email
 
 User = get_user_model()
-
+#User Scheduling Blood Donation Camp
 class BloodDonationSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="donation_schedules", null=True, blank=True)
     date = models.DateField(help_text="Date of the scheduled donation")
@@ -131,6 +131,7 @@ class BloodDonationSchedule(models.Model):
     class Meta:
         ordering = ['date']  # Ensures that schedules are ordered by date
 
+#User Registering For Blood Donation Camp
 class BloodDonationRegistration(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     camp = models.ForeignKey(BloodDonationCampSchedule, on_delete=models.CASCADE)
