@@ -81,6 +81,8 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 User = get_user_model()
+
+
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
@@ -89,7 +91,12 @@ class UserProfileCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         # Look up the user by username (instead of ID)
         username = self.request.data.get('user')
-        user = User.objects.get(username=username)  # Lookup by username
+        try:
+            user = User.objects.get(username=username)  # Lookup by username
+        except User.DoesNotExist:
+            raise NotFound(f"User with username '{username}' does not exist.")
+
+        # Save the serializer with the associated user
         serializer.save(user=user)
 
     def post(self, request, *args, **kwargs):
@@ -97,6 +104,9 @@ class UserProfileCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Return a 400 Bad Request response with the serializer errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []

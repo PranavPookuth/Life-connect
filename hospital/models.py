@@ -30,14 +30,12 @@ class Hospital(models.Model):
         expiration_time = self.otp_generated_at + timezone.timedelta(minutes=5)
         return timezone.now() > expiration_time
 
-
 class BloodDonationCampSchedule(models.Model):
     STATUS_CHOICES = [
         ('scheduled', 'Scheduled'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
-
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)  # Hospital hosting the camp
     date = models.DateField()  # Date of the blood donation camp
     location = models.CharField(max_length=255)  # Location of the blood donation camp
