@@ -49,7 +49,7 @@ class User(AbstractBaseUser):
         default=generate_unique_id  # Automatically generate on user creation
     )
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=255, blank=False)
+    username = models.CharField(max_length=255, blank=False, unique=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_generated_at = models.DateTimeField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
@@ -140,6 +140,7 @@ class BloodDonationRegistration(models.Model):
     def __str__(self):
         return f"{self.user.username} registered for {self.camp.location} on {self.registration_date}"
 
+#User responding For
 class DonorResponse(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)  # The responding user
     alert = models.ForeignKey(EmergencyDonationAlert, on_delete=models.CASCADE, related_name='responses')

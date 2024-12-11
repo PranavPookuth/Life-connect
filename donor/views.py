@@ -89,14 +89,15 @@ class UserProfileCreateView(generics.CreateAPIView):
     serializer_class = UserProfileSerializer
 
     def perform_create(self, serializer):
-        # Look up the user by username (instead of ID)
         username = self.request.data.get('user')
-        try:
-            user = User.objects.get(username=username)  # Lookup by username
-        except User.DoesNotExist:
-            raise NotFound(f"User with username '{username}' does not exist.")
+        if not username:
+            raise ValidationError({"user": "This field is required and cannot be empty."})
 
-        # Save the serializer with the associated user
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound({"error": f"User with username '{username}' does not exist."})
+
         serializer.save(user=user)
 
     def post(self, request, *args, **kwargs):
@@ -104,9 +105,7 @@ class UserProfileCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # Return a 400 Bad Request response with the serializer errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
@@ -115,28 +114,21 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserProfileSerializer
 
     def get_object(self):
-        # Retrieve the user profile using the user ID in the URL
         try:
-            user_profile = UserProfile.objects.get(pk=self.kwargs['pk'])
-            return user_profile
+            return UserProfile.objects.get(pk=self.kwargs['pk'])
         except UserProfile.DoesNotExist:
-            raise NotFound("User profile not found.")
+            raise NotFound({"error": "User profile not found."})
 
     def perform_update(self, serializer):
-        # Ensure that the profile is updated for the correct user
         user_profile = self.get_object()
-        serializer.save(user=user_profile.user)  # Save the profile for the associated user
+        serializer.save(user=user_profile.user)
 
     def patch(self, request, *args, **kwargs):
-        # Override the PATCH method to allow partial updates
-        instance = self.get_object()  # Retrieve the profile instance
-
-        # Update the instance with the partial data provided in the request
+        instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
-
         if serializer.is_valid():
-            serializer.save()  # Save the updated data
-            return Response(serializer.data)  # Return the updated data
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

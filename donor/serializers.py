@@ -147,7 +147,6 @@ class UserSerializer(serializers.ModelSerializer):
 User = get_user_model()
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # Update the 'user' field to return the username instead of the full user object
     user = serializers.StringRelatedField()
     email = serializers.CharField(source='user.email', read_only=True)
 
@@ -155,17 +154,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
-            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood','created_at'
+            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood', 'created_at'
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-
-        # If the user is not willing to donate organs, remove the organs_to_donate field from the response
         if not instance.willing_to_donate_organ:
-            representation.pop('organs_to_donate', None)  # Remove organs_to_donate field
-
+            representation.pop('organs_to_donate', None)
         return representation
+
+    def validate_user(self, value):
+        if not User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("User with this username does not exist.")
+        return value
+
 #Scheduling Blood Donation camp
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
     user = serializers.CharField(write_only=True, required=True)  # Accept username as a string
