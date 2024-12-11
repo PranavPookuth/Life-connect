@@ -131,6 +131,7 @@ class BloodDonationSchedule(models.Model):
     class Meta:
         ordering = ['date']  # Ensures that schedules are ordered by date
 
+
 #User Registering For Blood Donation Camp
 class BloodDonationRegistration(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
