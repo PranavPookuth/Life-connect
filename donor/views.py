@@ -131,7 +131,6 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class BloodDonationScheduleCreateView(generics.CreateAPIView):
     queryset = BloodDonationSchedule.objects.all()
     serializer_class = BloodDonationScheduleSerializer
