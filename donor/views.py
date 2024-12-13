@@ -41,8 +41,7 @@ class VerifyOTPView(APIView):
             user.save()
             return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+ 
 class RequestOTPView(APIView):
     permission_classes = []
     authentication_classes = []

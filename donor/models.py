@@ -107,7 +107,6 @@ class UserProfile(models.Model):
         default=True,
         help_text="Indicates if the user is willing to donate blood."
     )
-
     def __str__(self):
         return f"Profile of {self.user.username},{self.blood_group}"
 
