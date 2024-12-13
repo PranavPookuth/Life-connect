@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 
 from hospital.models import BloodDonationCampSchedule,EmergencyDonationAlert
 
-
 #user Registration using username,email,blood_type,is_organ_donor,is_blood_donor
 class RegisterSerializer(serializers.ModelSerializer):
     unique_id = serializers.ReadOnlyField()
