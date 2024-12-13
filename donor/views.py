@@ -80,7 +80,11 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 User = get_user_model()
-
+class UserProfileListView(generics.ListAPIView):
+    permission_classes = []
+    authentication_classes = []
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
