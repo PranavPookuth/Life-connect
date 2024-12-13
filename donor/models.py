@@ -104,7 +104,7 @@ class UserProfile(models.Model):
         help_text="List of organs the user is willing to donate (e.g., ['Kidney', 'Heart'])."
     )
     willing_to_donate_blood = models.BooleanField(
-        default=False,
+        default=True,
         help_text="Indicates if the user is willing to donate blood."
     )
 
