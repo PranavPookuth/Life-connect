@@ -269,5 +269,3 @@ class SystemManagementView(APIView):
 
 
 
-
-
