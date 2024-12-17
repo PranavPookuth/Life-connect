@@ -266,4 +266,3 @@ class SystemManagementView(APIView):
         )
         return Response(users)
 
-
