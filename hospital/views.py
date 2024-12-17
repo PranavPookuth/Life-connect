@@ -264,5 +264,5 @@ class SystemManagementView(APIView):
             "user__is_active",  # Accessing the is_active field from the related User model
             "willing_to_donate_organ",
         )
-        return Response(users)
+        return Re sponse(users)
 
