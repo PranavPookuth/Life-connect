@@ -22,7 +22,7 @@ urlpatterns=[
 
     path('alerts/', EmergencyDonationAlertListCreateView.as_view(), name='alert-list-create'),
     path('alerts/<int:pk>/', EmergencyDonationAlertDetailView.as_view(), name='alert-detail'),
-
+mnkmk
     path("dashboard/analytics/", AnalyticsView.as_view(), name="dashboard-analytics"),
     path("dashboard/donor-statistics/", DonorStatisticsView.as_view(), name="donor-statistics"),
     path("dashboard/emergency-alerts/", EmergencyAlertsListCreateView.as_view(), name="emergency-alerts-list"),
