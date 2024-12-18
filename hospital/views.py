@@ -79,6 +79,7 @@ class HospitalLoginView(APIView):
             # You can optionally create a session or token if needed
             return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class HospitalCreateView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
