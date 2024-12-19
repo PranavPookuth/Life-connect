@@ -13,8 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db.models import Count
 
-cl
-ass HospitalRegisterSerializer(serializers.ModelSerializer):
+class HospitalRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hospital
         fields = ['name', 'email', 'contact_number', 'address']
