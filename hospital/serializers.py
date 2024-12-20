@@ -161,7 +161,10 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
         try:
             hospital = Hospital.objects.get(name=hospital_name)
         except Hospital.DoesNotExist:
-            raise serializers.ValidationError(f"Hospital with the name '{hospital_name}' does not exist.")
+            raise serializers.ValidationError({"hospital": f"Hospital with the name '{hospital_name}' does not exist."})
+
+        if not hospital.is_verified or not hospital.is_active:
+            raise serializers.ValidationError({"hospital": "Hospital is not verified or active."})
 
         validated_data['hospital'] = hospital
         return super().create(validated_data)
@@ -172,7 +175,7 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
             try:
                 hospital = Hospital.objects.get(name=hospital_name)
             except Hospital.DoesNotExist:
-                raise serializers.ValidationError(f"Hospital with the name '{hospital_name}' does not exist.")
+                raise serializers.ValidationError({"hospital": f"Hospital with the name '{hospital_name}' does not exist."})
             validated_data['hospital'] = hospital
 
         return super().update(instance, validated_data)

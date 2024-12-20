@@ -157,30 +157,20 @@ class BloodDonationCampCreateView(generics.ListCreateAPIView):
     queryset = BloodDonationCampSchedule.objects.all()
 
     def perform_create(self, serializer):
-        # Retrieve hospital name from the request data (this assumes hospital name is provided)
         hospital_name = self.request.data.get('hospital', None)
 
         if not hospital_name:
-            return Response({"detail": "Hospital name is required."}, status=status.HTTP_400_BAD_REQUEST)
+            raise serializers.ValidationError({"detail": "Hospital name is required."})
 
-        # Fetch the hospital instance by name
         try:
             hospital = Hospital.objects.get(name=hospital_name)
         except Hospital.DoesNotExist:
-            return Response({"detail": f"Hospital with the name '{hospital_name}' does not exist."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise serializers.ValidationError({"detail": f"Hospital with the name '{hospital_name}' does not exist."})
 
-        # Check if the hospital is verified and active
         if not hospital.is_verified or not hospital.is_active:
-            return Response({"detail": "Hospital is not verified or active."}, status=status.HTTP_403_FORBIDDEN)
+            raise serializers.ValidationError({"detail": "Hospital is not verified or active."})
 
-        # Save the hospital instance to the camp schedule
         serializer.save(hospital=hospital)
-
-    def create(self, request, *args, **kwargs):
-        # Optionally, perform any pre-processing or additional checks here
-        return super().create(request, *args, **kwargs)
-
 
 # Blood Donation camp Schedule Retrieve, Update, Delete View
 class BloodDonationCampScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
