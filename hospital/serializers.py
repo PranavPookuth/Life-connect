@@ -8,7 +8,7 @@ import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from donor.models import UserProfile, BloodDonationSchedule
+from donor.models import UserProfile,BloodDonationSchedule
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db.models import Count
