@@ -143,12 +143,6 @@ class DonorSearchView(APIView):
         serializer = UserProfileSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=200)
 
-class BloodDonationCampListView(generics.ListAPIView):
-    permission_classes = []
-    authentication_classes = []
-    serializer_class = BloodDonationCampScheduleSerializer
-    queryset = BloodDonationCampSchedule.objects.all()
-
 # Blood Donation camp Schedule List and create
 class BloodDonationCampCreateView(generics.ListCreateAPIView):
     permission_classes = []
