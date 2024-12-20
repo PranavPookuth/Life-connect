@@ -18,6 +18,7 @@ urlpatterns=[
     path('hospital/donors/search/', DonorSearchView.as_view(), name='donor-search'),
 
     path('hospital/blood-donation-camps/', BloodDonationCampCreateView.as_view(), name='create-camp'),
+    path('hospital/blood-donation-camps-list/',BloodDonationCampListView.as_view(),name='list-camp'),
     path('hospital/blood-donation-camps/<str:hospital_name>/<int:pk>/', BloodDonationCampScheduleDetailView.as_view(),name='blood-donation-camp-detail'),
 
     path('alerts/', EmergencyDonationAlertListCreateView.as_view(), name='alert-list-create'),
