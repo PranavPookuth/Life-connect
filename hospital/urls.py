@@ -24,7 +24,6 @@ urlpatterns=[
     path('camps/<int:camp_id>/donors/', DonorsForCampView.as_view(), name='donors-for-camp'),
 
 
-
     path('alerts/', EmergencyDonationAlertListCreateView.as_view(), name='alert-list-create'),
     path('alerts/<int:pk>/', EmergencyDonationAlertDetailView.as_view(), name='alert-detail'),
 
