@@ -1,5 +1,5 @@
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 import random
 from django_filters.rest_framework import filters
 from rest_framework.exceptions import ValidationError
@@ -12,7 +12,7 @@ from . models import *
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework import generics
-from donor.models import  UserProfile, BloodDonationSchedule
+from donor.models import  UserProfile, BloodDonationSchedule,BloodDonationRegistration
 from donor.serializers import UserProfileSerializer, BloodDonationScheduleSerializer
 from urllib.parse import unquote
 from django.db.models import Count
@@ -187,6 +187,46 @@ class BloodDonationCampScheduleDetailView(generics.RetrieveUpdateDestroyAPIView)
     def perform_update(self, serializer):
         # You might want to handle any custom updates here
         serializer.save()
+
+class DonorsForCampView(APIView):
+    """
+    View to list donors registered for a specific blood donation camp.
+    """
+    permission_classes = []  # Customize as needed (e.g., add authentication)
+    authentication_classes = []  # Add authentication classes if required
+
+    def get(self, request, camp_id):
+        # Validate the camp
+        camp = get_object_or_404(BloodDonationCampSchedule, id=camp_id)
+
+        # Get all registrations for the camp
+        registrations = BloodDonationRegistration.objects.filter(camp=camp).select_related('user__user')
+
+        # Serialize the data
+        data = [
+            {
+                "username": reg.user.user.username,
+                "email": reg.user.user.email,
+                "blood_group": reg.user.blood_group,
+                "contact_number": reg.user.contact_number,
+                "address": reg.user.address,
+                "registration_date": reg.registration_date,
+            }
+            for reg in registrations
+        ]
+
+        return Response(
+            {
+                "camp": {
+                    "location": camp.location,
+                    "date": camp.date,
+                    "hospital": camp.hospital.name,
+                },
+                "registrations": data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 # Emergency Donation Alert List and Create
 class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
