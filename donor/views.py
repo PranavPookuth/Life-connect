@@ -238,7 +238,7 @@ class RegisterForCampDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodDonationRegistration.objects.all()
     serializer_class = BloodDonationRegistrationSerializer
 
-class  EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
+classEmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
     queryset = EmergencyDonationAlert.objects.filter(is_active=True)
