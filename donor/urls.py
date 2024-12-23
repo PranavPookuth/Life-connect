@@ -16,6 +16,9 @@ urlpatterns=[
     # URL to retrieve, update, or delete a UserProfile by ID
     path('user-profile/<int:pk>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
 
+    path('consent-certificate/upload/', ConsentCertificateCreateView.as_view(), name='consent-certificate-upload'),
+    path('consent-certificate/<int:pk>/', ConsentCertificateRetrieveUpdateView.as_view(),name='consent-certificate-retrieve-update'),
+
     path('schedule-donation/', BloodDonationScheduleCreateView.as_view(), name='schedule-donation'),
     path('schedule-donation/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='schedule-donation-details'),
 

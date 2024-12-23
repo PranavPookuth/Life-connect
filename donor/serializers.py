@@ -173,6 +173,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("User with this username does not exist.")
         return value
 
+class ConsentCertificateUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsentCertificate
+        fields = ['consent_certificate']
+
+    def validate_consent_certificate(self, value):
+        # Ensure the uploaded file is a PDF
+        if not value.name.endswith('.pdf'):
+            raise serializers.ValidationError("The uploaded file must be a PDF.")
+        return value
+
+
 #Scheduling Blood Donation camp
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
     user = serializers.CharField(write_only=True, required=True)  # Accept username as a string

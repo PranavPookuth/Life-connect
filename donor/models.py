@@ -114,6 +114,12 @@ class UserProfile(models.Model):
         """Return the email of the associated user."""
         return self.user.email
 
+class ConsentCertificate(models.Model):
+    user_profile = models.OneToOneField(
+        UserProfile, on_delete=models.CASCADE, related_name="consent_certificate"
+    )  # Link to UserProfile
+    consent_certificate = models.FileField(upload_to='consent_certificate/', blank=True, null=True)
+
 User = get_user_model()
 #User Scheduling Blood Donation Camp
 class BloodDonationSchedule(models.Model):

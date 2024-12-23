@@ -134,6 +134,24 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ConsentCertificateCreateView(generics.CreateAPIView):
+    queryset = ConsentCertificate.objects.all()
+    serializer_class = ConsentCertificateUploadSerializer
+
+    def perform_create(self, serializer):
+        user_profile = get_object_or_404(UserProfile, user=self.request.user)
+        serializer.save(user_profile=user_profile)
+
+class ConsentCertificateRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = ConsentCertificate.objects.all()
+    serializer_class = ConsentCertificateUploadSerializer
+
+    def get_object(self):
+        # Retrieve the certificate for the currently authenticated user's profile
+        user_profile = get_object_or_404(UserProfile, user=self.request.user)
+        return get_object_or_404(ConsentCertificate, user_profile=user_profile)
+
+
 class BloodDonationScheduleCreateView(generics.CreateAPIView):
     queryset = BloodDonationSchedule.objects.all()
     serializer_class = BloodDonationScheduleSerializer
