@@ -35,6 +35,7 @@ class BloodDonationCampSchedule(models.Model):
         ('scheduled', 'Scheduled'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
+
     ]
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)  # Hospital hosting the camp
     date = models.DateField()  # Date of the blood donation camp
