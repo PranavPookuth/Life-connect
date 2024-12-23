@@ -76,8 +76,11 @@ class HospitalLoginView(APIView):
             hospital.otp = None
             hospital.save()
 
-            # You can optionally create a session or token if needed
-            return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
+            # Include the hospital's name in the response
+            return Response(
+                {"message": f"Login successful! Welcome, {hospital.name}."},
+                status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class HospitalCreateView(generics.ListCreateAPIView):
