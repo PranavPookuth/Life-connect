@@ -48,7 +48,14 @@ class HospitalVerifyOTPView(APIView):
             hospital.otp = None
             hospital.save()
 
-            return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
+            # Include the hospital's name in the response
+            return Response(
+                {
+                    "hospital": hospital.name,
+                    "message": "Email verified successfully!"
+                },
+                status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
