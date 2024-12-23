@@ -78,7 +78,10 @@ class HospitalLoginView(APIView):
 
             # Include the hospital's name in the response
             return Response(
-                {"message": f"Login successful! Welcome, {hospital.name}."},
+                {
+                    "hospital": hospital.name,
+                    "message": "Login successful!"
+                },
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -249,7 +252,6 @@ class EmergencyDonationAlertListCreateView(generics.ListCreateAPIView):
 
         # Proceed with the default create logic
         return super().create(request, *args, **kwargs)
-
 
 # Emergency Donation Alert Retrieve, Update, Delete View
 class EmergencyDonationAlertDetailView(generics.RetrieveUpdateDestroyAPIView):
