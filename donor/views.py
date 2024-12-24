@@ -1,5 +1,5 @@
 import random
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
@@ -133,23 +133,6 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class ConsentCertificateCreateView(generics.CreateAPIView):
-    queryset = ConsentCertificate.objects.all()
-    serializer_class = ConsentCertificateUploadSerializer
-
-    def perform_create(self, serializer):
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
-        serializer.save(user_profile=user_profile)
-
-class ConsentCertificateRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    queryset = ConsentCertificate.objects.all()
-    serializer_class = ConsentCertificateUploadSerializer
-
-    def get_object(self):
-        # Retrieve the certificate for the currently authenticated user's profile
-        user_profile = get_object_or_404(UserProfile, user=self.request.user)
-        return get_object_or_404(ConsentCertificate, user_profile=user_profile)
 
 
 class BloodDonationScheduleCreateView(generics.CreateAPIView):
@@ -320,4 +303,35 @@ class ChatMessageCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
+
+class UserConsentListCreateView(generics.ListCreateAPIView):
+    permission_classes = []
+    authentication_classes = []
+    """API view to list all user consent records and create a new one."""
+    queryset = UserConsent.objects.all()
+    serializer_class = UserConsentSerializer
+
+    def perform_create(self, serializer):
+        """Override to save user consent during creation."""
+        # Automatically associate the current user (if authentication is done)
+        # serializer.save(user=self.request.user) # This can be added if the user is authenticated and the username is not provided
+        serializer.save()
+
+    def get_permissions(self):
+        """Allow access without authentication."""
+        return []  # No authentication is needed
+
+class UserConsentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    """API view to retrieve, update (re-upload certificate), and delete a user consent record."""
+    queryset = UserConsent.objects.all()
+    serializer_class = UserConsentSerializer
+
+    def perform_update(self, serializer):
+        """Override to handle the re-upload of the certificate."""
+        # Handle the file replacement logic in the serializer, or you can process it here if needed.
+        serializer.save()
+
+    def get_permissions(self):
+        """Allow access without authentication."""
+        return []  # No authentication is needed
 

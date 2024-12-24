@@ -12,10 +12,12 @@ urlpatterns=[
     path('hospital-login/', HospitalLoginView.as_view(), name='hospital-login'),
 
     path('hospital/',HospitalCreateView.as_view(),name='hospital'),
-    path('hospital-details/<int:pk>/',HospitalDetailView.as_view(),name='hospital-details'),
+    path('hospital-details/<int:pk>/',HospitalDetailView.as_view(), name='hospital-details'),
 
     path('donors/', HospitalDonorListView.as_view(), name='hospital-donors-list'),
     path('hospital/donors/search/', DonorSearchView.as_view(), name='donor-search'),
+
+    # path('hospital/certificates/', ConsentCertificateListView.as_view(), name='certificate-list-api'),
 
     path('hospital/blood-donation-camps/', BloodDonationCampCreateView.as_view(), name='create-camp'),
     path('hospital/blood-donation-camps-list/',BloodDonationCampListView.as_view(),name='list-camp'),

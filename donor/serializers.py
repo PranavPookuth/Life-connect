@@ -116,7 +116,6 @@ class RequestOTPSerializer(serializers.Serializer):
 
         return value
 
-
 #login using email and otp
 class VerifyOTPLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -172,18 +171,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if not User.objects.filter(username=value).exists():
             raise serializers.ValidationError("User with this username does not exist.")
         return value
-
-class ConsentCertificateUploadSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConsentCertificate
-        fields = ['consent_certificate']
-
-    def validate_consent_certificate(self, value):
-        # Ensure the uploaded file is a PDF
-        if not value.name.endswith('.pdf'):
-            raise serializers.ValidationError("The uploaded file must be a PDF.")
-        return value
-
 
 #Scheduling Blood Donation camp
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):
@@ -291,3 +278,29 @@ class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatMessage
         fields = ['id', 'sender_type', 'sender_name', 'hospital', 'content', 'timestamp', 'is_read']
+
+class UserConsentSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(max_length=255, write_only=True)  # Accept username as input
+    username = serializers.CharField(source='user.username', read_only=True)  # Include username in the response
+
+    class Meta:
+        model = UserConsent
+        fields = ['user', 'username', 'certificate', 'consent_date', 'is_consent_given']
+
+    def validate_certificate(self, value):
+        """Ensure that the file is a PDF"""
+        if not value.name.endswith('.pdf'):
+            raise serializers.ValidationError("The certificate must be a PDF file.")
+        return value
+
+    def validate_user(self, value):
+        """Validate that the username exists in the User model"""
+        try:
+            user = User.objects.get(username=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this username does not exist.")
+        return user
+
+
+
+

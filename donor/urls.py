@@ -16,8 +16,6 @@ urlpatterns=[
     # URL to retrieve, update, or delete a UserProfile by ID
     path('user-profile/<int:pk>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
 
-    path('consent-certificate/upload/', ConsentCertificateCreateView.as_view(), name='consent-certificate-upload'),
-    path('consent-certificate/<int:pk>/', ConsentCertificateRetrieveUpdateView.as_view(),name='consent-certificate-retrieve-update'),
 
     path('schedule-donation/', BloodDonationScheduleCreateView.as_view(), name='schedule-donation'),
     path('schedule-donation/<int:pk>/', BloodDonationScheduleDetailView.as_view(), name='schedule-donation-details'),
@@ -35,7 +33,9 @@ urlpatterns=[
     path('chat/<int:hospital_id>/', ChatMessageListView.as_view(), name='chat_history'),
     path('chat/send/', ChatMessageCreateView.as_view(), name='send_message'),
 
-
+    path('consent/',UserConsentListCreateView.as_view(), name='user-consent-list-create'),
+    path('consent/<int:pk>/', UserConsentRetrieveUpdateDestroyView.as_view(),
+         name='user-consent-retrieve-update-destroy'),
 
 
 ]

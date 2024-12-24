@@ -180,6 +180,7 @@ class BloodDonationCampScheduleSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
+
 class EmergencyDonationAlertSerializer(serializers.ModelSerializer):
     hospital_name = serializers.SerializerMethodField()
 

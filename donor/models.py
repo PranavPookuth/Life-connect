@@ -114,11 +114,6 @@ class UserProfile(models.Model):
         """Return the email of the associated user."""
         return self.user.email
 
-class ConsentCertificate(models.Model):
-    user_profile = models.OneToOneField(
-        UserProfile, on_delete=models.CASCADE, related_name="consent_certificate"
-    )  # Link to UserProfile
-    consent_certificate = models.FileField(upload_to='consent_certificate/', blank=True, null=True)
 
 User = get_user_model()
 #User Scheduling Blood Donation Camp
@@ -187,4 +182,21 @@ class ChatMessage(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
+class UserConsent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="consents")
+    certificate = models.FileField(
+        upload_to='certificates/',
+        blank=False,
+        null=False,
+        help_text="Upload your certificate in PDF format."
+    )
+    consent_date = models.DateTimeField(auto_now_add=True)
+    is_consent_given = models.BooleanField(default=False, help_text="Indicates if the user has given consent.")
+
+    def __str__(self):
+        return f"Consent for {self.user.username} on {self.consent_date}"
+
+    class Meta:
+        verbose_name = 'User Consent'
+        verbose_name_plural = 'User Consents'
 

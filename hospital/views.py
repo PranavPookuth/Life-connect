@@ -156,20 +156,6 @@ class DonorSearchView(APIView):
         serializer = UserProfileSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=200)
 
-
-def consent_certificate_view(request, hospital_id):
-    # Fetch the hospital instance
-    hospital = get_object_or_404(Hospital, pk=hospital_id)
-
-    # Retrieve all consent certificates associated with this hospital
-    consent_certificates = ConsentCertificate.objects.filter(hospital=hospital)
-
-    return render(request, 'hospital/consent_certificates.html', {
-        'hospital': hospital,
-        'certificates': consent_certificates
-    })
-
-
 class BloodDonationCampListView(generics.ListAPIView):
     permission_classes = []
     authentication_classes = []
