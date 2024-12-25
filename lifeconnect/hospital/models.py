@@ -43,7 +43,7 @@ class BloodDonationCampSchedule(models.Model):
     end_time = models.TimeField()  # End time for the camp
     description = models.TextField(blank=True, null=True)  # Description of the camp
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='scheduled')  # Status of the camp
-    created_at = models.DateTimeField(aut o_now_add=True)  # Automatically set when the camp is created
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set when the camp is created
 
     def __str__(self):
         return f"Blood Donation Camp at {self.hospital.name} on {self.date} ({self.status})"
