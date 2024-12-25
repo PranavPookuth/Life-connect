@@ -296,7 +296,7 @@ class UserConsentSerializer(serializers.ModelSerializer):
     def validate_user(self, value):
         """Validate that the username exists in the User model"""
         try:
-             user = User.objects.get(username=value)
+            user = User.objects.get(username=value)
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this username does not exist.")
         return user
