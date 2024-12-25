@@ -299,7 +299,7 @@ class UserConsentSerializer(serializers.ModelSerializer):
             user = User.objects.get(username=value)
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this username does not exist.")
-        return  user
+        return user
 
 
 
