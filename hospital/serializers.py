@@ -8,7 +8,7 @@ import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from donor.models import UserProfile, BloodDonationSchedule
+from donor.models import UserProfile, BloodDonationSchedule,UserConsent
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db.models import Count
@@ -215,7 +215,6 @@ class SystemManagementSerializer(serializers.ModelSerializer):
         fields = ["user", "is_active", "willing_to_donate_organ"]
 
 
-from donor.models import UserConsent
 
 class UserConsentSerializer(serializers.ModelSerializer):
     class Meta:

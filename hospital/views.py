@@ -12,8 +12,8 @@ from . models import *
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework import generics
-from donor.models import  UserProfile, BloodDonationSchedule,BloodDonationRegistration
-from donor.serializers import UserProfileSerializer, BloodDonationScheduleSerializer
+from donor.models import  UserProfile, BloodDonationSchedule,BloodDonationRegistration,UserConsent
+from donor.serializers import UserProfileSerializer, BloodDonationScheduleSerializer,UserConsentSerializer
 from urllib.parse import unquote
 from django.db.models import Count
 # Create your views here.
@@ -314,9 +314,6 @@ class SystemManagementView(APIView):
             "willing_to_donate_organ",
         )
         return Response(users)
-
-from donor.models import UserConsent
-from donor.serializers import UserConsentSerializer
 
 class UserConsentListView(generics.ListAPIView):
     permission_classes = []
