@@ -37,10 +37,11 @@ class VerifyOTPView(APIView):
             user = User.objects.get(email=email)
             user.is_verified = True
             user.is_active = True
-            user.otp = None
+            user.otp = None  # Clear OTP after successful verification
             user.save()
             return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
  
 class RequestOTPView(APIView):
     permission_classes = []
@@ -61,10 +62,22 @@ class LoginView(APIView):
         if serializer.is_valid():
             email = serializer.validated_data['email']
             user = User.objects.get(email=email)
+
+            # Reset OTP after successful login
             user.otp = None
             user.save()
+
+            # Log in the user
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
+
+            # Include the username in the response
+            return Response(
+                {
+                    "user": user.username,
+                    "message": "Login successful!"
+                },
+                status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserListCreateView(generics.ListCreateAPIView):

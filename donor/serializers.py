@@ -69,10 +69,12 @@ class OTPVerifySerializer(serializers.Serializer):
     def validate(self, data):
         try:
             user = User.objects.get(email=data['email'])
+
             if user.is_verified:
                 raise serializers.ValidationError("This account is already verified.")
+
+            # Check if OTP is expired
             if user.is_otp_expired():
-                # Regenerate a new OTP
                 user.regenerate_otp()
                 send_mail(
                     'OTP Expired - New OTP',
@@ -81,10 +83,22 @@ class OTPVerifySerializer(serializers.Serializer):
                     [user.email]
                 )
                 raise serializers.ValidationError("OTP has expired. A new OTP has been sent to your email.")
+
+            # Check if OTP is invalid
             if user.otp != data['otp']:
-                raise serializers.ValidationError("Invalid OTP.")
+                # Generate and send a new OTP
+                user.regenerate_otp()
+                send_mail(
+                    'Invalid OTP - New OTP',
+                    f'Your new OTP is {user.otp}',
+                    'praveencodeedex@gmail.com',
+                    [user.email]
+                )
+                raise serializers.ValidationError("Invalid OTP. A new OTP has been sent to your email.")
+
         except User.DoesNotExist:
             raise serializers.ValidationError("No account found with this email.")
+
         return data
 
 
