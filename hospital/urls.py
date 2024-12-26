@@ -33,4 +33,6 @@ urlpatterns=[
     path("dashboard/emergency-alerts/", EmergencyAlertsListCreateView.as_view(), name="emergency-alerts-list"),
     path("dashboard/emergency-alerts/<int:pk>/", EmergencyAlertDetailView.as_view(), name="emergency-alert-detail"),
     path("dashboard/system-management/", SystemManagementView.as_view(), name="system-management"),
+
+    path('consents/', UserConsentListView.as_view(), name='user-consent-list'),
 ]

@@ -315,3 +315,14 @@ class SystemManagementView(APIView):
         )
         return Response(users)
 
+from donor.models import UserConsent
+from donor.serializers import UserConsentSerializer
+
+class UserConsentListView(generics.ListAPIView):
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = UserConsentSerializer
+
+    def get_queryset(self):
+        # Optionally filter consents by `is_consent_given=True`
+        return UserConsent.objects.filter(is_consent_given=True)
