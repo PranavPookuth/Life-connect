@@ -42,7 +42,7 @@ class VerifyOTPView(APIView):
             return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
- 
+
 class RequestOTPView(APIView):
     permission_classes = []
     authentication_classes = []
@@ -335,6 +335,8 @@ class UserConsentListCreateView(generics.ListCreateAPIView):
         return []  # No authentication is needed
 
 class UserConsentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = []
+    authentication_classes = []
     """API view to retrieve, update (re-upload certificate), and delete a user consent record."""
     queryset = UserConsent.objects.all()
     serializer_class = UserConsentSerializer

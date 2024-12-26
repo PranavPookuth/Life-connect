@@ -191,7 +191,7 @@ class UserConsent(models.Model):
         help_text="Upload your certificate in PDF format."
     )
     consent_date = models.DateTimeField(auto_now_add=True)
-    is_consent_given = models.BooleanField(default=False, help_text="Indicates if the user has given consent.")
+    is_consent_given = models.BooleanField(default=True, help_text="Indicates if the user has given consent.")
 
     def __str__(self):
         return f"Consent for {self.user.username} on {self.consent_date}"
