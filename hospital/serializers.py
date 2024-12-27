@@ -215,6 +215,7 @@ class SystemManagementSerializer(serializers.ModelSerializer):
         fields = ["user", "is_active", "willing_to_donate_organ"]
 
 
+
 class UserConsentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserConsent
