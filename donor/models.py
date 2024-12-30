@@ -191,11 +191,8 @@ class UserConsent(models.Model):
         help_text="Upload your certificate in PDF format."
     )
     signimage = models.ImageField(
-        upload_to='signimages/',
-        blank=False,  # Mandatory
-        null=False,  # Mandatory
-        help_text="Upload an image related to your consent."
-    )
+        upload_to='signimages/',blank=False,
+        null=False,  help_text="Upload an image related to your consent.")
     consent_date = models.DateTimeField(auto_now_add=True)
     is_consent_given = models.BooleanField(default=True, help_text="Indicates if the user has given consent.")
 
