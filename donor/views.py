@@ -1,5 +1,7 @@
 import random
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
+from rest_framework.generics import RetrieveAPIView
+
 from .serializers import *
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
@@ -333,6 +335,22 @@ class UserConsentListCreateView(generics.ListCreateAPIView):
     def get_permissions(self):
         """Allow access without authentication."""
         return []  # No authentication is needed
+
+class UserConsentRetrieveView(RetrieveAPIView):
+    queryset = UserConsent.objects.all()
+    serializer_class = UserConsentSerializer
+
+    def get_object(self):
+        """Override to retrieve UserConsent by username."""
+        username = self.kwargs.get('username')
+        try:
+            user = User.objects.get(username=username)
+            consent = UserConsent.objects.filter(user=user).first()
+            if not consent:
+                raise NotFound(f"No consent record found for username '{username}'.")
+            return consent
+        except User.DoesNotExist:
+            raise NotFound(f"User with username '{username}' does not exist.")
 
 class UserConsentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []

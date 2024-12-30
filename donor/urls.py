@@ -36,6 +36,6 @@ urlpatterns=[
     path('consent/',UserConsentListCreateView.as_view(), name='user-consent-list-create'),
     path('consent/<int:pk>/', UserConsentRetrieveUpdateDestroyView.as_view(),
          name='user-consent-retrieve-update-destroy'),
-
+    path('consents/<str:username>/', UserConsentRetrieveView.as_view(), name='user-consent-detail'),
 
 ]
