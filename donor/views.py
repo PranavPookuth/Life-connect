@@ -336,21 +336,25 @@ class UserConsentListCreateView(generics.ListCreateAPIView):
         """Allow access without authentication."""
         return []  # No authentication is needed
 
+
 class UserConsentRetrieveView(RetrieveAPIView):
     queryset = UserConsent.objects.all()
     serializer_class = UserConsentSerializer
 
     def get_object(self):
-        """Override to retrieve UserConsent by username."""
         username = self.kwargs.get('username')
+        print(f"Fetching consent for username: {username}")  # Debugging
         try:
             user = User.objects.get(username=username)
             consent = UserConsent.objects.filter(user=user).first()
             if not consent:
+                print(f"No consent record found for {username}")  # Debugging
                 raise NotFound(f"No consent record found for username '{username}'.")
             return consent
         except User.DoesNotExist:
+            print(f"User {username} does not exist")  # Debugging
             raise NotFound(f"User with username '{username}' does not exist.")
+
 
 class UserConsentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []

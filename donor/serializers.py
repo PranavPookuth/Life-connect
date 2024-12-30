@@ -293,6 +293,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
         model = ChatMessage
         fields = ['id', 'sender_type', 'sender_name', 'hospital', 'content', 'timestamp', 'is_read']
 
+
 class UserConsentSerializer(serializers.ModelSerializer):
     user = serializers.CharField(max_length=255, write_only=True)  # Accept username as input
     username = serializers.CharField(source='user.username', read_only=True)  # Include username in the response
@@ -313,6 +314,11 @@ class UserConsentSerializer(serializers.ModelSerializer):
             user = User.objects.get(username=value)
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this username does not exist.")
+
+        # Check if the user has already uploaded a certificate
+        if UserConsent.objects.filter(user=user).exists():
+            raise serializers.ValidationError("User has already uploaded a consent certificate.")
+
         return user
 
 
