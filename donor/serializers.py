@@ -300,7 +300,7 @@ class UserConsentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserConsent
-        fields = ['user', 'username', 'certificate', 'consent_date', 'is_consent_given']
+        fields = ['user', 'username', 'certificate', 'signimage', 'consent_date', 'is_consent_given']
 
     def validate_certificate(self, value):
         """Ensure that the file is a PDF"""
@@ -321,5 +321,10 @@ class UserConsentSerializer(serializers.ModelSerializer):
 
         return user
 
+    def validate_image(self, value):
+        """Ensure that an image is uploaded"""
+        if not value:
+            raise serializers.ValidationError("An image is required.")
+        return value
 
 
