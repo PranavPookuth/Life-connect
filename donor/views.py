@@ -336,7 +336,6 @@ class UserConsentListCreateView(generics.ListCreateAPIView):
         """Allow access without authentication."""
         return []  # No authentication is needed
 
-
 class UserConsentRetrieveView(RetrieveAPIView):
     queryset = UserConsent.objects.all()
     serializer_class = UserConsentSerializer
