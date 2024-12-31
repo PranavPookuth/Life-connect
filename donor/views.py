@@ -318,7 +318,6 @@ class ChatMessageCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
-
 class UserConsentListCreateView(generics.ListCreateAPIView):
     permission_classes = []
     authentication_classes = []
