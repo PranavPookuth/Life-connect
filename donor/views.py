@@ -357,6 +357,22 @@ class DonorChatListView(generics.ListAPIView):
 
         return ChatMessage.objects.filter(sender_name=donor_username)
 
+class HospitalChatListView(generics.ListAPIView):
+    """
+    Retrieve all chat messages sent by a specific hospital (sender_type = hospital) using the hospital's name.
+    """
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = ChatMessageSerializer
+
+    def get_queryset(self):
+        hospital_name = self.request.query_params.get('hospital_name')
+
+        if not hospital_name:
+            raise serializers.ValidationError({"hospital_name": "Hospital name is required as a query parameter."})
+
+        # Filter messages where sender_type is 'hospital' and hospital's name matches
+        return ChatMessage.objects.filter(sender_type="hospital", hospital__name=hospital_name)
 
 
 class UserConsentListCreateView(generics.ListCreateAPIView):
