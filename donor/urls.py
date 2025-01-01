@@ -32,6 +32,8 @@ urlpatterns=[
 
     path('chat/<int:hospital_id>/', ChatMessageListView.as_view(), name='chat_history'),
     path('chat/send/', ChatMessageCreateView.as_view(), name='send_message'),
+    path('messages/all/', AllChatMessagesListView.as_view(), name='all_chat_messages_list'),
+
 
     path('consent/',UserConsentListCreateView.as_view(), name='user-consent-list-create'),
     path('consent/<int:pk>/', UserConsentRetrieveUpdateDestroyView.as_view(),

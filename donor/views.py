@@ -297,11 +297,11 @@ class DonorResponseDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = DonationResponseSerializer
 
 class ChatMessageListView(generics.ListAPIView):
-    permission_classes = []
-    authentication_classes = []
     """
     Retrieve chat history between a donor and a hospital.
     """
+    permission_classes = []
+    authentication_classes = []
     serializer_class = ChatMessageSerializer
 
     def get_queryset(self):
@@ -309,15 +309,38 @@ class ChatMessageListView(generics.ListAPIView):
         return ChatMessage.objects.filter(hospital_id=hospital_id)
 
 class ChatMessageCreateView(generics.CreateAPIView):
-    permission_classes = []
-    authentication_classes = []
     """
     Send a message to a hospital or from a hospital to a donor.
     """
+    permission_classes = []
+    authentication_classes = []
     serializer_class = ChatMessageSerializer
 
     def perform_create(self, serializer):
-        serializer.save()
+        hospital_name = self.request.data.get('hospital')
+        if not hospital_name:
+            raise ValidationError({"hospital": "Hospital name is required."})
+
+        try:
+            # Retrieve the Hospital instance by its name
+            hospital = Hospital.objects.get(name=hospital_name)
+        except Hospital.DoesNotExist:
+            raise ValidationError({"hospital": "Hospital with this name does not exist."})
+
+        # Save the ChatMessage with the retrieved Hospital instance
+        serializer.save(hospital=hospital)
+
+class AllChatMessagesListView(generics.ListAPIView):
+    """
+    Retrieve all chat messages.
+    """
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = ChatMessageSerializer
+
+    def get_queryset(self):
+        return ChatMessage.objects.all()
+
 
 class UserConsentListCreateView(generics.ListCreateAPIView):
     permission_classes = []

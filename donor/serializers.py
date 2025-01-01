@@ -289,9 +289,12 @@ class DonationResponseSerializer(serializers.ModelSerializer):
 
 #Chatbox
 class ChatMessageSerializer(serializers.ModelSerializer):
+    hospital_name = serializers.CharField(source="hospital.name", read_only=True)
+    hospital = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = ChatMessage
-        fields = ['id', 'sender_type', 'sender_name', 'hospital', 'content', 'timestamp', 'is_read']
+        fields = ['id', 'sender_type', 'sender_name', 'hospital', 'hospital_name', 'content', 'timestamp', 'is_read']
 
 
 class UserConsentSerializer(serializers.ModelSerializer):
