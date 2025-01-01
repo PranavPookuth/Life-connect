@@ -341,6 +341,23 @@ class AllChatMessagesListView(generics.ListAPIView):
     def get_queryset(self):
         return ChatMessage.objects.all()
 
+class DonorChatListView(generics.ListAPIView):
+    """
+    Retrieve all chat messages involving a specific donor by username.
+    """
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = ChatMessageSerializer
+
+    def get_queryset(self):
+        donor_username = self.request.query_params.get('username')
+
+        if not donor_username:
+            raise serializers.ValidationError({"username": "Donor username is required as a query parameter."})
+
+        return ChatMessage.objects.filter(sender_name=donor_username)
+
+
 
 class UserConsentListCreateView(generics.ListCreateAPIView):
     permission_classes = []
