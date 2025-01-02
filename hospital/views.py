@@ -109,7 +109,7 @@ class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
 class HospitalDonorListView(generics.ListAPIView):
     permission_classes = []
     authentication_classes = []
-    queryset = UserProfile.objects.all()  # Fetch all donor profiles
+    queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
 #Donor Search View

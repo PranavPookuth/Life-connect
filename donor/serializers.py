@@ -165,13 +165,14 @@ class UserSerializer(serializers.ModelSerializer):
 User = get_user_model()
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    user = serializers.CharField(source='user.username', read_only=True)  # Only include username
     email = serializers.CharField(source='user.email', read_only=True)
+    unique_id = serializers.CharField(source='user.unique_id', read_only=True)
 
     class Meta:
         model = UserProfile
         fields = [
-            'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
+            'unique_id', 'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
             'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood', 'created_at'
         ]
 
@@ -181,10 +182,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             representation.pop('organs_to_donate', None)
         return representation
 
-    def validate_user(self, value):
-        if not User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("User with this username does not exist.")
-        return value
 
 #Scheduling Blood Donation camp
 class BloodDonationScheduleSerializer(serializers.ModelSerializer):

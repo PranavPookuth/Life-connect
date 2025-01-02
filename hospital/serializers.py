@@ -8,7 +8,7 @@ import uuid
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from donor.models import UserProfile, BloodDonationSchedule,UserConsent
+from donor.models import UserProfile, BloodDonationSchedule,UserConsent,User
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db.models import Count
@@ -123,9 +123,17 @@ class HospitalSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)  # Only include username
+    email = serializers.CharField(source='user.email', read_only=True)
+    unique_id = serializers.CharField(source='user.unique_id', read_only=True)
+
     class Meta:
         model = UserProfile
-        fields = '__all__'  # You can specify specific fields if needed
+        fields = [
+            'unique_id', 'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
+            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood', 'created_at'
+        ]
+
 
 class DonorSearchSerializer(serializers.Serializer):
     blood_group = serializers.CharField(max_length=3, required=False)  # Example: 'A+', 'O-', etc.
