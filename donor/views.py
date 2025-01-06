@@ -107,6 +107,7 @@ class UserProfileListView(generics.ListAPIView):
             queryset = queryset.filter(user__username=user_username)
         return queryset
 
+
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
     authentication_classes = []
