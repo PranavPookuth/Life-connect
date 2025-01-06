@@ -98,8 +98,14 @@ User = get_user_model()
 class UserProfileListView(generics.ListAPIView):
     permission_classes = []
     authentication_classes = []
-    queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+
+    def get_queryset(self):
+        queryset = UserProfile.objects.all()
+        user_username = self.request.query_params.get('user', None)
+        if user_username:
+            queryset = queryset.filter(user__username=user_username)
+        return queryset
 
 class UserProfileCreateView(generics.CreateAPIView):
     permission_classes = []
