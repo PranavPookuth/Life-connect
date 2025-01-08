@@ -101,11 +101,12 @@ class UserProfileListView(generics.ListAPIView):
     serializer_class = UserProfileSerializer
 
     def get_queryset(self):
-        queryset = UserProfile.objects.all()
         user_username = self.request.query_params.get('user', None)
         if user_username:
-            queryset = queryset.filter(user__username=user_username)
-        return queryset
+            if not User.objects.filter(username=user_username).exists():
+                raise NotFound({"error": f"User with username '{user_username}' does not exist."})
+            return UserProfile.objects.filter(user__username=user_username)
+        return UserProfile.objects.all()
 
 
 class UserProfileCreateView(generics.CreateAPIView):

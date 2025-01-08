@@ -91,6 +91,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     contact_number = models.IntegerField(null=False, blank=False)
     address = models.TextField(blank=False, null=False)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     id_proof = models.FileField(upload_to='id_proofs/', blank=False, null=False)  # File upload for ID proof
     willing_to_donate_organ = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)

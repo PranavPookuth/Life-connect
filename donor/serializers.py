@@ -168,19 +168,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)  # Only include username
     email = serializers.CharField(source='user.email', read_only=True)
     unique_id = serializers.CharField(source='user.unique_id', read_only=True)
+    profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = [
-            'unique_id', 'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 'blood_group',
-            'willing_to_donate_organ', 'organs_to_donate', 'willing_to_donate_blood', 'created_at'
+            'unique_id', 'id', 'user', 'email', 'contact_number', 'address', 'id_proof', 
+            'profile_image', 'profile_image_url', 'blood_group', 'willing_to_donate_organ',
+            'organs_to_donate', 'willing_to_donate_blood', 'created_at'
         ]
+
+    def get_profile_image_url(self, obj):
+        """Return the full URL for the profile image."""
+        request = self.context.get('request')
+        if obj.profile_image and request:
+            return request.build_absolute_uri(obj.profile_image.url)
+        return None
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if not instance.willing_to_donate_organ:
             representation.pop('organs_to_donate', None)
         return representation
+
 
 
 #Scheduling Blood Donation camp
