@@ -16,7 +16,7 @@ from django.db.models import Count
 class HospitalRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hospital
-        fields = ['name', 'email', 'contact_number', 'address']
+        fields = ['name', 'email', 'contact_number', 'address', 'image']  # Added image field
 
     def validate_email(self, value):
         if Hospital.objects.filter(email=value, is_verified=True).exists():
@@ -38,6 +38,7 @@ class HospitalRegisterSerializer(serializers.ModelSerializer):
             [hospital.email]
         )
         return hospital
+
 
 class HospitalOTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()

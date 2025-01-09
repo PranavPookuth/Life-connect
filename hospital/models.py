@@ -7,6 +7,7 @@ class Hospital(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     contact_number = models.CharField(max_length=15, unique=True)
+    image = models.ImageField(upload_to='hospital_images/', blank=True, null=True)
     address = models.TextField()
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_generated_at = models.DateTimeField(null=True, blank=True)
