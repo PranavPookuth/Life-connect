@@ -40,6 +40,7 @@ class HospitalRegisterSerializer(serializers.ModelSerializer):
         return hospital
  
  
+
 class HospitalOTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
