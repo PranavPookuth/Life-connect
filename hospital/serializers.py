@@ -39,6 +39,7 @@ class HospitalRegisterSerializer(serializers.ModelSerializer):
         )
         return hospital
  
+ 
 
 class HospitalOTPVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
