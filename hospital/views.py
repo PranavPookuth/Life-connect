@@ -99,6 +99,7 @@ class HospitalCreateView(generics.ListCreateAPIView):
     queryset = Hospital.objects.all()
     serializer_class = HospitalSerializer
 
+#listing the hospital using hospital name
 class HospitalByNameView(APIView):
     permission_classes = []
     authentication_classes = []
