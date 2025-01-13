@@ -104,7 +104,7 @@ class HospitalByNameView(APIView):
     authentication_classes = []
 
     def get(self, request):
-        hospital_name = request.query_params.get('name', None)  # Retrieve the 'name' parameter
+        hospital_name = request.query_params.get('name', None)  # Retrieve hospital name from query params
         if hospital_name:
             try:
                 # Use a case-insensitive query to find the hospital by name
@@ -118,12 +118,24 @@ class HospitalByNameView(APIView):
                 )
         return Response({"error": "No 'name' parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-# Hospital Retrieve, Update, Delete View
 class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
-    queryset = Hospital.objects.all()
     serializer_class = HospitalSerializer
+
+    def get_object(self):
+        hospital_name = self.kwargs.get('name', None)
+        if hospital_name:
+            try:
+                return Hospital.objects.get(name__iexact=hospital_name)
+            except Hospital.DoesNotExist:
+                raise Http404("Hospital with the specified name does not exist.")
+        raise Http404("No 'name' parameter provided.")
+
+    def get_serializer_context(self):
+        return {'request': self.request}  # Include the request context
+
+
 #Donor List View
 class HospitalDonorListView(generics.ListAPIView):
     permission_classes = []

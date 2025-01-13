@@ -119,19 +119,32 @@ class HospitalLoginSerializer(serializers.Serializer):
 
         return data
 
+
 class HospitalSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()  # Custom method for the image URL
+    image = serializers.SerializerMethodField()  # Ensure image URL is returned
 
     class Meta:
         model = Hospital
         fields = '__all__'
 
     def get_image(self, obj):
-        request = self.context.get('request')  # Get the request object from context
+        request = self.context.get('request')
         if obj.image:
-            # Build the full URL for the image
             return request.build_absolute_uri(obj.image.url) if request else obj.image.url
         return None
+
+    def update(self, instance, validated_data):
+        # Handle the image field separately
+        image = self.context['request'].FILES.get('image')
+        if image:
+            instance.image = image
+
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)  # Only include username

@@ -14,7 +14,8 @@ urlpatterns=[
     path('hospitals/',HospitalCreateView.as_view(),name='hospital'),
     path('hospital/', HospitalByNameView.as_view(), name='hospital-by-name'),
 
-    path('hospital-details/<int:pk>/',HospitalDetailView.as_view(), name='hospital-details'),
+    path('hospital-details/<str:name>/', HospitalDetailView.as_view(), name='hospital-details'),
+
 
     path('donors/', HospitalDonorListView.as_view(), name='hospital-donors-list'),
     path('hospital/donors/search/', DonorSearchView.as_view(), name='donor-search'),
