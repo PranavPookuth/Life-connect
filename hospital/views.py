@@ -117,7 +117,7 @@ class HospitalByNameView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
         return Response({"error": "No 'name' parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
-
+#Patch and update hospital
 class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = []
     authentication_classes = []
