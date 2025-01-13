@@ -11,7 +11,9 @@ urlpatterns=[
     path('hospital-request-otp/', HospitalRequestLoginOTPView.as_view(), name='hospital-request-otp'),
     path('hospital-login/', HospitalLoginView.as_view(), name='hospital-login'),
 
-    path('hospital/',HospitalCreateView.as_view(),name='hospital'),
+    path('hospitals/',HospitalCreateView.as_view(),name='hospital'),
+    path('hospital/', HospitalByNameView.as_view(), name='hospital-by-name'),
+
     path('hospital-details/<int:pk>/',HospitalDetailView.as_view(), name='hospital-details'),
 
     path('donors/', HospitalDonorListView.as_view(), name='hospital-donors-list'),
