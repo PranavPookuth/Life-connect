@@ -136,7 +136,6 @@ class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_serializer_context(self):
         return {'request': self.request}  # Include the request context
 
-
 #Donor List View
 class HospitalDonorListView(generics.ListAPIView):
     permission_classes = []
