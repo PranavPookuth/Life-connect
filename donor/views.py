@@ -101,9 +101,6 @@ class UserProfileListView(generics.ListAPIView):
     serializer_class = UserProfileSerializer
 
 
-
-
-
     def get_queryset(self):
         user_username = self.request.query_params.get('user', None)
         if user_username:
